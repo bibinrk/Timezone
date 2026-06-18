@@ -154,7 +154,9 @@ button {
 
 #city-search,
 .coords-form input,
-.edit-form input {
+.edit-form input,
+.office-time-input,
+.planner-duration-control select {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 9px 11px;
@@ -166,9 +168,227 @@ button {
 #city-search:focus,
 .coords-form input:focus,
 .edit-form input:focus,
-.timezone-format-control select:focus {
+.timezone-format-control select:focus,
+.office-time-input:focus,
+.planner-duration-control select:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+.meeting-planner {
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(17, 22, 34, 0.82);
+}
+
+.planner-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.planner-title-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.planner-title-row h3 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.planner-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.planner-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.legend-dot.ideal {
+  background: #22c55e;
+}
+
+.legend-dot.manage {
+  background: #f59e0b;
+}
+
+.legend-dot.bad {
+  background: #ef4444;
+}
+
+.planner-duration-control {
+  min-width: 92px;
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.planner-duration-control select {
+  padding: 7px 9px;
+  font-size: 0.78rem;
+}
+
+.planner-best-times {
+  margin-top: 7px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 5px;
+}
+
+.best-time-chip {
+  min-width: 0;
+  border-radius: 8px;
+  padding: 5px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f8fbff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.planner-calendar {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.planner-day {
+  min-width: 0;
+  border-radius: 8px;
+  padding: 5px 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(20, 25, 38, 0.78);
+  color: var(--ink);
+  display: grid;
+  gap: 1px;
+  line-height: 1.05;
+}
+
+.planner-day.active {
+  border-color: rgba(132, 171, 255, 0.95);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.22);
+}
+
+.planner-day-dow {
+  font-size: 0.7rem;
+  color: rgba(245, 247, 255, 0.74);
+}
+
+.planner-day-date {
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.planner-grid {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: minmax(170px, 190px) repeat(24, minmax(0, 1fr));
+  gap: 3px;
+  align-items: stretch;
+}
+
+.planner-grid-label,
+.planner-hour-label,
+.planner-cell {
+  min-width: 0;
+}
+
+.planner-grid-label {
+  min-height: 19px;
+  border-radius: 7px;
+  padding: 4px 6px;
+  background: rgba(20, 25, 38, 0.6);
+  color: #dce6ff;
+  font-size: 0.72rem;
+  line-height: 1.1;
+}
+
+.planner-zone-title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 800;
+}
+
+.planner-zone-tz {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+.planner-office-hours {
+  margin-top: 3px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 3px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+
+.office-time-input {
+  width: 100%;
+  min-width: 0;
+  padding: 2px 3px;
+  border-radius: 6px;
+  font-size: 0.64rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.planner-hour-label {
+  min-height: 19px;
+  border-radius: 5px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.56rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.planner-cell {
+  min-height: 19px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.status-ideal {
+  background: rgba(34, 197, 94, 0.86);
+}
+
+.status-manage {
+  background: rgba(245, 158, 11, 0.88);
+}
+
+.status-bad {
+  background: rgba(239, 68, 68, 0.72);
 }
 
 .selected-cities {
@@ -183,7 +403,7 @@ button {
 .selected-city-item {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 62px auto auto;
-  grid-template-rows: auto auto;
+  grid-template-rows: auto auto auto;
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
@@ -209,10 +429,17 @@ button {
   grid-row: 2;
 }
 
+.selected-city-relation {
+  font-size: 0.78rem;
+  color: var(--muted);
+  grid-column: 1 / 2;
+  grid-row: 3;
+}
+
 .selected-city-item .analog-clock {
   justify-self: end;
   grid-column: 2 / 3;
-  grid-row: 2;
+  grid-row: 2 / 4;
 }
 
 .selected-city-item .inline-time-input {
@@ -222,12 +449,12 @@ button {
 
 .selected-city-item .edit-city-time {
   grid-column: 3 / 4;
-  grid-row: 2;
+  grid-row: 2 / 4;
 }
 
 .selected-city-item .delete-city {
   grid-column: 4 / 5;
-  grid-row: 2;
+  grid-row: 2 / 4;
 }
 
 .inline-time-input {
@@ -274,7 +501,8 @@ button {
 
 .world-map {
   width: 100%;
-  height: min(75vh, 880px);
+  height: min(42vh, 430px);
+  min-height: 260px;
 }
 
 .leaflet-container {
@@ -357,7 +585,7 @@ button {
 .fixed-city-item {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 62px auto;
-  grid-template-rows: auto auto;
+  grid-template-rows: auto auto auto;
   gap: 6px 8px;
   align-items: center;
   border: 1px solid var(--border);
@@ -389,20 +617,27 @@ button {
   grid-row: 2;
 }
 
+.fixed-city-relation {
+  font-size: 0.76rem;
+  color: var(--muted);
+  grid-column: 1 / 2;
+  grid-row: 3;
+}
+
 .fixed-city-datetime.inline-time-input {
   margin-top: 0;
 }
 
 .fixed-city-item .analog-clock {
   grid-column: 2 / 3;
-  grid-row: 1 / 3;
+  grid-row: 1 / 4;
   justify-self: end;
   align-self: center;
 }
 
 .fixed-city-item .edit-city-time {
   grid-column: 3 / 4;
-  grid-row: 1 / 3;
+  grid-row: 1 / 4;
   align-self: center;
 }
 
@@ -509,5 +744,29 @@ button {
 
   .coords-form {
     grid-template-columns: 1fr;
+  }
+
+  .planner-header {
+    grid-template-columns: 1fr;
+  }
+
+  .planner-grid {
+    grid-template-columns: minmax(118px, 132px) repeat(24, minmax(0, 1fr));
+    gap: 2px;
+  }
+
+  .planner-grid-label {
+    padding: 4px;
+    font-size: 0.66rem;
+  }
+
+  .planner-hour-label,
+  .planner-cell {
+    min-height: 16px;
+    border-radius: 4px;
+  }
+
+  .planner-hour-label {
+    font-size: 0.48rem;
   }
 }

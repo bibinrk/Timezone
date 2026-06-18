@@ -57,6 +57,34 @@
         <button class="search-add-btn" type="submit" aria-label="Add by coordinates" title="Add by coordinates">◎</button>
       </form>
 
+      <section id="meeting-planner" class="meeting-planner" aria-label="Meeting planner">
+        <div class="planner-header">
+          <div>
+            <div class="planner-title-row">
+              <h3>Meeting Planner</h3>
+              <div class="planner-legend" aria-label="Timing legend">
+                <span><i class="legend-dot ideal"></i>Ideal</span>
+                <span><i class="legend-dot manage"></i>Can manage</span>
+                <span><i class="legend-dot bad"></i>Not good</span>
+              </div>
+            </div>
+            <div id="planner-best-times" class="planner-best-times"></div>
+          </div>
+
+          <label class="planner-duration-control">Length
+            <select id="meeting-duration">
+              <option value="30">30 min</option>
+              <option value="60" selected>60 min</option>
+              <option value="90">90 min</option>
+              <option value="120">120 min</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="planner-calendar" class="planner-calendar" role="list"></div>
+        <div id="planner-grid" class="planner-grid" aria-label="Meeting availability by hour"></div>
+      </section>
+
       <section class="map-shell" aria-label="Map">
         <div id="world-map" class="world-map"></div>
       </section>
