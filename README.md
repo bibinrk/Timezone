@@ -8,7 +8,7 @@ It has a map to understand grographically where is the location to those users w
 Its licensed under the MIT License and is free for anyone to take and use.
 
 Home:
-<img width="1596" height="715" alt="Home" src="https://github.com/user-attachments/assets/10057bfa-18bc-46dc-9716-35f3fb51a41f" />
+<img width="1584" height="789" alt="Home" src="https://github.com/user-attachments/assets/48c2089a-39d2-4fdc-9909-71f1d2c502a2" />
 
 Default Cities:
 <img width="936" height="465" alt="Default Cities" src="https://github.com/user-attachments/assets/cc8cb841-b709-40e3-8b76-a49d0cdbe67d" />
