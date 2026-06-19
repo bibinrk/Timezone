@@ -23,6 +23,8 @@ const resetTimeBtnEl = document.getElementById("reset-time-btn");
 const focusCurrentBtnEl = document.getElementById("focus-current-btn");
 const timezoneFormatEl = document.getElementById("timezone-format");
 const meetingDurationEl = document.getElementById("meeting-duration");
+const toggleMapConnectionsEl = document.getElementById("toggle-map-connections");
+const mapFocusSelectEl = document.getElementById("map-focus-select");
 const plannerCalendarEl = document.getElementById("planner-calendar");
 const plannerBestTimesEl = document.getElementById("planner-best-times");
 const plannerGridEl = document.getElementById("planner-grid");
@@ -108,6 +110,8 @@ let currentMarker = null;
 let currentAccuracyCircle = null;
 let fixedCityMarker = null;
 let selectedCityMarker = null;
+let mapConnectionsGroup = null;
+let lastMapConnectionsKey = "";
 let idSeed = 1;
 const CURRENT_LOCATION_ZOOM = 16;
 const DEFAULT_OFFICE_START = "07:00";
@@ -1273,6 +1277,8 @@ function tick() {
     renderSelectedCities(referenceDate);
   }
   renderMeetingPlanner(referenceDate);
+  updateMapConnections();
+  updateMapFocusDropdownState();
 }
 
 function getReferenceDate() {
@@ -1284,8 +1290,153 @@ function getReferenceDate() {
   return new Date(Date.now() + state.current.timeShiftMs);
 }
 
+function updateMapConnections(force = false) {
+  if (!map) return;
+
+  const isChecked = toggleMapConnectionsEl && toggleMapConnectionsEl.checked;
+  const currentKey = `${isChecked}|${state.current.lat},${state.current.lon}|${state.selected.map((c) => c.id).join(",")}`;
+
+  if (!force && lastMapConnectionsKey === currentKey) {
+    updateMapConnectionsPopupTimes();
+    return;
+  }
+
+  lastMapConnectionsKey = currentKey;
+
+  if (mapConnectionsGroup) {
+    map.removeLayer(mapConnectionsGroup);
+    mapConnectionsGroup = null;
+  }
+
+  if (fixedCityMarker) {
+    map.removeLayer(fixedCityMarker);
+    fixedCityMarker = null;
+  }
+  if (selectedCityMarker) {
+    map.removeLayer(selectedCityMarker);
+    selectedCityMarker = null;
+  }
+
+  if (!isChecked) {
+    upsertCurrentMarker();
+    return;
+  }
+
+  // If checked, ensure default current marker is removed
+  upsertCurrentMarker();
+
+  mapConnectionsGroup = L.layerGroup().addTo(map);
+  const currentCoords = [state.current.lat, state.current.lon];
+  const bounds = [currentCoords];
+
+  const refDate = getReferenceDate();
+  const currentMarkerLabel = `<b>Current Location</b><br>${escapeHtml(state.current.city)}<br>${formatTimezone(refDate, state.current.timezone)}`;
+
+  L.marker(currentCoords, { title: "Current location" })
+    .bindPopup(currentMarkerLabel)
+    .addTo(mapConnectionsGroup);
+
+  state.selected.forEach((city) => {
+    if (typeof city.lat !== "number" || typeof city.lon !== "number") return;
+    const cityCoords = [city.lat, city.lon];
+    bounds.push(cityCoords);
+
+    const cityTime = formatDateTimeForZone(refDate, city.timezone);
+    const cityPopup = `<b>${escapeHtml(city.name)}</b><br>${formatTimezone(refDate, city.timezone)}<br>${cityTime}`;
+
+    L.marker(cityCoords, { title: city.name })
+      .bindPopup(cityPopup)
+      .addTo(mapConnectionsGroup);
+
+    L.polyline([currentCoords, cityCoords], {
+      color: "#ff453a",
+      weight: 2.5,
+      opacity: 0.85,
+      dashArray: "6, 6"
+    }).addTo(mapConnectionsGroup);
+  });
+
+  if (bounds.length > 1) {
+    map.fitBounds(bounds, { padding: [40, 40] });
+  }
+}
+
+function updateMapConnectionsPopupTimes() {
+  if (!mapConnectionsGroup) return;
+  const refDate = getReferenceDate();
+  let idx = 0;
+  mapConnectionsGroup.eachLayer((layer) => {
+    if (layer instanceof L.Marker) {
+      if (idx === 0) {
+        const label = `<b>Current Location</b><br>${escapeHtml(state.current.city)}<br>${formatTimezone(refDate, state.current.timezone)}`;
+        layer.setPopupContent(label);
+      } else {
+        const city = state.selected[idx - 1];
+        if (city) {
+          const cityTime = formatDateTimeForZone(refDate, city.timezone);
+          const cityPopup = `<b>${escapeHtml(city.name)}</b><br>${formatTimezone(refDate, city.timezone)}<br>${cityTime}`;
+          layer.setPopupContent(cityPopup);
+        }
+      }
+      idx++;
+    }
+  });
+}
+
+function updateMapFocus() {
+  if (!map) return;
+  const focus = mapFocusSelectEl ? mapFocusSelectEl.value : "current";
+
+  if (focus === "current") {
+    if (typeof state.current.lat === "number" && typeof state.current.lon === "number") {
+      map.setView([state.current.lat, state.current.lon], 12);
+      upsertCurrentMarker();
+      if (currentMarker) {
+        currentMarker.openPopup();
+      }
+    }
+  } else if (focus === "selected") {
+    const bounds = [];
+    state.selected.forEach((city) => {
+      if (typeof city.lat === "number" && typeof city.lon === "number") {
+        bounds.push([city.lat, city.lon]);
+      }
+    });
+
+    if (bounds.length > 0) {
+      map.fitBounds(bounds, { padding: [40, 40] });
+    }
+  }
+}
+
+function updateMapFocusDropdownState() {
+  if (!mapFocusSelectEl) return;
+  const selectedOption = mapFocusSelectEl.querySelector('option[value="selected"]');
+  if (selectedOption) {
+    const hasSelected = state.selected.length > 0;
+    selectedOption.disabled = !hasSelected;
+    if (!hasSelected && mapFocusSelectEl.value === "selected") {
+      mapFocusSelectEl.value = "current";
+      updateMapFocus();
+    }
+  }
+}
+
 function upsertCurrentMarker() {
   if (typeof state.current.lat !== "number" || typeof state.current.lon !== "number") return;
+
+  const isConnectionsChecked = toggleMapConnectionsEl && toggleMapConnectionsEl.checked;
+  if (isConnectionsChecked) {
+    if (currentMarker) {
+      map.removeLayer(currentMarker);
+      currentMarker = null;
+    }
+    if (currentAccuracyCircle) {
+      currentAccuracyCircle.remove();
+      currentAccuracyCircle = null;
+    }
+    return;
+  }
 
   const coords = [state.current.lat, state.current.lon];
   const coordsLabel = hasCurrentCoordinates()
@@ -1818,6 +1969,14 @@ meetingDurationEl.addEventListener("change", (event) => {
 
   state.planner.durationMinutes = duration;
   renderMeetingPlanner(getReferenceDate(), true);
+});
+
+toggleMapConnectionsEl.addEventListener("change", () => {
+  updateMapConnections(true);
+});
+
+mapFocusSelectEl.addEventListener("change", () => {
+  updateMapFocus();
 });
 
 plannerCalendarEl.addEventListener("click", (event) => {

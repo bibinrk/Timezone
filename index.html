@@ -87,14 +87,20 @@
             <div id="planner-best-times" class="planner-best-times"></div>
           </div>
 
-          <label class="planner-duration-control">Length
-            <select id="meeting-duration">
-              <option value="30">30 min</option>
-              <option value="60" selected>60 min</option>
-              <option value="90">90 min</option>
-              <option value="120">120 min</option>
-            </select>
-          </label>
+          <div class="planner-controls">
+            <label class="planner-duration-control">Length
+              <select id="meeting-duration">
+                <option value="30">30 min</option>
+                <option value="60" selected>60 min</option>
+                <option value="90">90 min</option>
+                <option value="120">120 min</option>
+              </select>
+            </label>
+            <label class="planner-map-toggle">
+              <input type="checkbox" id="toggle-map-connections" />
+              <span>Show Map Paths</span>
+            </label>
+          </div>
         </div>
 
         <div id="planner-calendar" class="planner-calendar" role="list"></div>
@@ -102,6 +108,14 @@
       </section>
 
       <section class="map-shell" aria-label="Map">
+        <div class="map-header">
+          <label class="map-focus-control">Map View:
+            <select id="map-focus-select">
+              <option value="current">Current Location</option>
+              <option value="selected" disabled>Selected Cities</option>
+            </select>
+          </label>
+        </div>
         <div id="world-map" class="world-map"></div>
       </section>
 
