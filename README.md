@@ -4,7 +4,7 @@ Timezone Converter and Meeting Planner:
 The timezone converter and Meeting Planner app is my first project keeping this principle of minimalistic requirements. It shows times in different timezones based on user entry of current location or a desired location.
 It is 24hours only.
 You can choose between GMT and UTC. DST is inbuilt and if its applicable will automatically apply and will be displayed. 
-It has a map to understand grographically where is the location to those users who havent travelled to that place or isnt well aware with geography.
+It has a map to understand geographically where is the location to those users who havent travelled to that place or isnt well aware with geography.
 Its licensed under the MIT License and is free for anyone to take and use.
 
 Home:
