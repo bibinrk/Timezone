@@ -1,4 +1,7 @@
 const currentTimeEl = document.getElementById("current-time");
+const currentDateEl = document.getElementById("current-date");
+const currentCalendarEl = document.getElementById("current-calendar");
+const currentAnalogClockEl = document.getElementById("current-analog-clock");
 const currentCityEl = document.getElementById("current-city");
 const currentTimezoneEl = document.getElementById("current-timezone");
 const currentCoordsEl = document.getElementById("current-coords");
@@ -18,7 +21,6 @@ const editTimeOnlyEl = document.getElementById("edit-time-only");
 const editErrorEl = document.getElementById("edit-error");
 const resetTimeBtnEl = document.getElementById("reset-time-btn");
 const focusCurrentBtnEl = document.getElementById("focus-current-btn");
-const openOrganicMapsBtnEl = document.getElementById("open-organic-maps-btn");
 const timezoneFormatEl = document.getElementById("timezone-format");
 const meetingDurationEl = document.getElementById("meeting-duration");
 const plannerCalendarEl = document.getElementById("planner-calendar");
@@ -108,8 +110,8 @@ let fixedCityMarker = null;
 let selectedCityMarker = null;
 let idSeed = 1;
 const CURRENT_LOCATION_ZOOM = 16;
-const DEFAULT_OFFICE_START = "09:00";
-const DEFAULT_OFFICE_END = "17:00";
+const DEFAULT_OFFICE_START = "07:00";
+const DEFAULT_OFFICE_END = "20:00";
 const MANAGE_BUFFER_MINUTES = 60;
 const PLANNER_DAY_COUNT = 7;
 const PLANNER_HOURS = Array.from({ length: 24 }, (_, hour) => hour);
@@ -134,6 +136,16 @@ function formatDateTimeForZone(date, timezone) {
     minute: "2-digit",
     second: "2-digit",
     hour12: false
+  }).format(date);
+}
+
+function formatDateForZone(date, timezone) {
+  return new Intl.DateTimeFormat(navigator.language || "en-US", {
+    timeZone: timezone,
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric"
   }).format(date);
 }
 
@@ -273,9 +285,9 @@ function getRelativeDayLabel(referenceDate, timezone) {
   const targetDayMs = Date.UTC(target.year, target.month - 1, target.day);
   const dayDelta = Math.round((targetDayMs - currentDayMs) / 86400000);
 
-  if (dayDelta < 0) return "previous day";
-  if (dayDelta > 0) return "next day";
-  return "current day";
+  if (dayDelta < 0) return "◀ Yesterday";
+  if (dayDelta > 0) return "▶ Tomorrow";
+  return "● Today";
 }
 
 function formatTimeRelation(referenceDate, timezone) {
@@ -417,7 +429,7 @@ function getPlannerZones() {
 
 function plannerStatusText(status) {
   if (status === "ideal") return "Ideal";
-  if (status === "manage") return "Can manage";
+  if (status === "manage") return "Can Manage";
   return "Not good";
 }
 
@@ -487,9 +499,13 @@ function getPlannerDayStatus(dateParts, zones) {
   return "bad";
 }
 
-function formatPlannerSlotLabel(slotDate, durationMinutes) {
+function formatPlannerSlotLabelForZone(slotDate, durationMinutes, timezone) {
   const endDate = new Date(slotDate.getTime() + (durationMinutes * 60000));
-  return `${formatTimeHmForZone(slotDate, state.current.timezone)}-${formatTimeHmForZone(endDate, state.current.timezone)}`;
+  return `${formatTimeHmForZone(slotDate, timezone)}-${formatTimeHmForZone(endDate, timezone)}`;
+}
+
+function formatPlannerSlotLabel(slotDate, durationMinutes) {
+  return formatPlannerSlotLabelForZone(slotDate, durationMinutes, state.current.timezone);
 }
 
 function getHmsPartsForZone(date, timezone) {
@@ -527,11 +543,19 @@ function updateAnalogClockElement(clockEl, referenceDate) {
   let secondDeg = secondFloat * 6;
 
   // Avoid a visible "snap back" when second hand wraps from ~360deg to 0deg.
-  const lastSecondDeg = Number(clockEl.dataset.lastSecondDeg || "0");
-  if (Number.isFinite(lastSecondDeg) && secondDeg + 180 < lastSecondDeg) {
-    secondDeg += 360;
+  const lastSecondDegStr = clockEl.dataset.lastSecondDeg;
+  if (lastSecondDegStr === undefined || lastSecondDegStr === "") {
+    clockEl.dataset.lastSecondDeg = String(secondDeg);
+  } else {
+    const lastSecondDeg = Number(lastSecondDegStr);
+    if (Number.isFinite(lastSecondDeg)) {
+      let diff = (secondDeg - lastSecondDeg) % 360;
+      if (diff < -180) diff += 360;
+      if (diff > 180) diff -= 360;
+      secondDeg = lastSecondDeg + diff;
+    }
+    clockEl.dataset.lastSecondDeg = String(secondDeg);
   }
-  clockEl.dataset.lastSecondDeg = String(secondDeg);
 
   hourHand.style.transform = `translate(-50%, -100%) rotate(${hourDeg}deg)`;
   minuteHand.style.transform = `translate(-50%, -100%) rotate(${minuteDeg}deg)`;
@@ -593,6 +617,16 @@ function sortByContinentThenName(a, b) {
   return String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base" });
 }
 
+function sortByOffset(a, b) {
+  const date = getReferenceDate();
+  const offsetA = getUtcOffsetMinutes(date, a.timezone);
+  const offsetB = getUtcOffsetMinutes(date, b.timezone);
+  if (offsetA !== offsetB) {
+    return offsetA - offsetB;
+  }
+  return String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base" });
+}
+
 function getFixedCitiesRaw() {
   return [...fixedCitiesBase, ...state.fixedExtra];
 }
@@ -616,7 +650,7 @@ function getFixedCitiesForRender() {
     ? raw.filter((city) => normalizeCityKey(city.name, city.timezone) !== toRemoveKey)
     : raw;
 
-  return filtered.slice().sort(sortByContinentThenName);
+  return filtered.slice().sort(sortByOffset);
 }
 
 function parseHmsToSeconds(value) {
@@ -651,21 +685,131 @@ function escapeHtml(value) {
   });
 }
 
-function organicMapsUrl(lat, lon, title) {
-  const params = new URLSearchParams({
-    v: "1",
-    ll: `${lat.toFixed(6)},${lon.toFixed(6)}`,
-    n: title || "Map point"
-  });
-  return `https://omaps.app/map?${params.toString()}`;
+function updateFlipClock(containerEl, hmsStr) {
+  const safeHms = hmsStr || "00:00";
+  const length = safeHms.length;
+  if (containerEl.children.length !== length) {
+    containerEl.innerHTML = '';
+    for (let i = 0; i < length; i++) {
+      const char = safeHms[i];
+      if (char === ':') {
+        const colon = document.createElement('span');
+        colon.className = 'flip-colon';
+        colon.textContent = ':';
+        containerEl.appendChild(colon);
+      } else {
+        const card = document.createElement('span');
+        card.className = 'flip-card';
+        card.textContent = char;
+        containerEl.appendChild(card);
+      }
+    }
+    return;
+  }
+
+  for (let i = 0; i < length; i++) {
+    const char = safeHms[i];
+    const child = containerEl.children[i];
+    if (char !== ':' && child.textContent !== char) {
+      child.textContent = char;
+      child.classList.remove('flip-animate');
+      void child.offsetWidth; // Trigger reflow
+      child.classList.add('flip-animate');
+    }
+  }
 }
 
-function organicMapsLink(lat, lon, title) {
-  return `<a href="${organicMapsUrl(lat, lon, title)}" target="_blank" rel="noopener">Open in Organic Maps</a>`;
+function getDaysInMonth(year, month1Indexed) {
+  if (month1Indexed === 2) {
+    return (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) ? 29 : 28;
+  }
+  const lengths = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return lengths[month1Indexed];
+}
+
+function renderMiniCalendar(containerEl, referenceDate) {
+  if (!containerEl) return;
+  const parts = getDatePartsForZone(referenceDate, state.current.timezone);
+  const year = parts.year;
+  const month1Idx = parts.month;
+  const day = parts.day;
+
+  const cacheKey = `${year}-${month1Idx}-${day}-${state.current.timezone}`;
+  if (containerEl.dataset.cacheKey === cacheKey) {
+    return;
+  }
+  containerEl.dataset.cacheKey = cacheKey;
+
+  containerEl.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.className = 'mini-cal-header';
+  const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+  header.textContent = `${monthNames[month1Idx - 1]} ${year}`;
+  containerEl.appendChild(header);
+
+  const weekdaysRow = document.createElement('div');
+  weekdaysRow.className = 'mini-cal-weekdays';
+  const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  weekdays.forEach(wk => {
+    const span = document.createElement('span');
+    span.textContent = wk;
+    weekdaysRow.appendChild(span);
+  });
+  containerEl.appendChild(weekdaysRow);
+
+  const grid = document.createElement('div');
+  grid.className = 'mini-cal-grid';
+
+  const firstDayDate = new Date(zonedDateTimeToUtcMs({ year, month: month1Idx, day: 1 }, 12, 0, state.current.timezone));
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: state.current.timezone,
+    weekday: "short"
+  });
+  const firstDayShort = formatter.format(firstDayDate);
+  const weekdayMap = { "Sun": 0, "Mon": 1, "Tue": 2, "Wed": 3, "Thu": 4, "Fri": 5, "Sat": 6 };
+  const firstDayIdx = weekdayMap[firstDayShort] !== undefined ? weekdayMap[firstDayShort] : 0;
+
+  const numDays = getDaysInMonth(year, month1Idx);
+
+  for (let i = 0; i < firstDayIdx; i++) {
+    const empty = document.createElement('span');
+    empty.className = 'mini-cal-day empty';
+    grid.appendChild(empty);
+  }
+
+  for (let d = 1; d <= numDays; d++) {
+    const span = document.createElement('span');
+    span.className = 'mini-cal-day';
+    span.textContent = d;
+    if (d === day) {
+      span.classList.add('today');
+    }
+    grid.appendChild(span);
+  }
+
+  containerEl.appendChild(grid);
 }
 
 function renderCurrentLocation(referenceDate) {
-  currentTimeEl.textContent = `Current Time: ${formatDateTimeForZone(referenceDate, state.current.timezone)}`;
+  const hm = formatTimeHmForZone(referenceDate, state.current.timezone);
+  updateFlipClock(currentTimeEl, hm);
+  if (currentDateEl) {
+    currentDateEl.textContent = formatDateForZone(referenceDate, state.current.timezone);
+  }
+
+  renderMiniCalendar(currentCalendarEl, referenceDate);
+
+  if (currentAnalogClockEl) {
+    let clock = currentAnalogClockEl.querySelector(".analog-clock");
+    if (!clock || clock.dataset.timezone !== state.current.timezone) {
+      currentAnalogClockEl.innerHTML = "";
+      clock = createAnalogClockElement(referenceDate, state.current.timezone);
+      clock.classList.add("large-clock");
+      currentAnalogClockEl.appendChild(clock);
+    }
+  }
+
   currentCityEl.textContent = `City: ${state.current.city}`;
   currentTimezoneEl.textContent = `Timezone: ${formatTimezone(referenceDate, state.current.timezone)}`;
   currentCoordsEl.textContent = `Lat, Long: ${formatCoords(state.current.lat, state.current.lon)}`;
@@ -725,6 +869,10 @@ function renderPlannerCalendar(referenceDate, zones, selectedDateParts) {
 function renderPlannerBestTimes(dateParts, zones) {
   plannerBestTimesEl.innerHTML = "";
 
+  if (zones.length < 2) {
+    return;
+  }
+
   const recommendedSlots = getRecommendedPlannerSlots(dateParts, zones);
   if (recommendedSlots.length === 0) {
     const chip = document.createElement("div");
@@ -738,7 +886,32 @@ function renderPlannerBestTimes(dateParts, zones) {
     const chip = document.createElement("div");
     chip.className = `best-time-chip status-${slot.status}`;
     chip.title = slot.title;
-    chip.textContent = `${formatPlannerSlotLabel(slot.slotDate, state.planner.durationMinutes)} ${plannerStatusText(slot.status)}`;
+
+    if (zones.length > 1) {
+      const zonesContainer = document.createElement("div");
+      zonesContainer.className = "best-time-zones";
+
+      for (const zone of zones) {
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "best-time-zone-name";
+        nameSpan.textContent = zone.name;
+
+        const timeSpan = document.createElement("span");
+        timeSpan.className = "best-time-zone-time";
+        timeSpan.textContent = formatPlannerSlotLabelForZone(slot.slotDate, state.planner.durationMinutes, zone.timezone);
+
+        zonesContainer.append(nameSpan, timeSpan);
+      }
+
+      const statusDiv = document.createElement("div");
+      statusDiv.className = "best-time-status";
+      statusDiv.textContent = plannerStatusText(slot.status);
+
+      chip.append(zonesContainer, statusDiv);
+    } else {
+      chip.textContent = `${formatPlannerSlotLabel(slot.slotDate, state.planner.durationMinutes)} ${plannerStatusText(slot.status)}`;
+    }
+
     plannerBestTimesEl.append(chip);
   }
 }
@@ -805,7 +978,7 @@ function appendPlannerZoneRow(dateParts, zone) {
   start.inputMode = "numeric";
   start.dataset.zoneKey = zone.key;
   start.dataset.field = "start";
-  start.setAttribute("aria-label", `${zone.name} office start`);
+  start.setAttribute("aria-label", `${zone.name} Meeting Start`);
 
   const separator = document.createElement("span");
   separator.textContent = "to";
@@ -818,7 +991,7 @@ function appendPlannerZoneRow(dateParts, zone) {
   end.inputMode = "numeric";
   end.dataset.zoneKey = zone.key;
   end.dataset.field = "end";
-  end.setAttribute("aria-label", `${zone.name} office end`);
+  end.setAttribute("aria-label", `${zone.name} Meeting End`);
 
   office.append(start, separator, end);
   label.append(title, timezone, office);
@@ -867,6 +1040,42 @@ function refreshTimezoneDisplay() {
 }
 
 function renderSelectedCities(referenceDate) {
+  const existingItems = Array.from(selectedCitiesEl.querySelectorAll(".selected-city-item"));
+  const activeEditInput = selectedCitiesEl.querySelector(".inline-time-input");
+  let editStateMatches = false;
+  if (state.inlineEdit && state.inlineEdit.type === "selected") {
+    editStateMatches = activeEditInput !== null &&
+      Number(activeEditInput.closest(".selected-city-item").dataset.id) === state.inlineEdit.id;
+  } else {
+    editStateMatches = activeEditInput === null;
+  }
+
+  const matches = editStateMatches &&
+    existingItems.length === state.selected.length &&
+    existingItems.every((item, idx) => Number(item.dataset.id) === state.selected[idx].id);
+
+  if (matches) {
+    for (let i = 0; i < state.selected.length; i++) {
+      const city = state.selected[i];
+      const item = existingItems[i];
+      const isEditing = state.inlineEdit
+        && state.inlineEdit.type === "selected"
+        && state.inlineEdit.id === city.id;
+
+      if (!isEditing) {
+        const timeSpan = item.querySelector(".selected-city-time");
+        if (timeSpan) {
+          timeSpan.textContent = formatTimeForZone(referenceDate, city.timezone);
+        }
+      }
+      const relationSpan = item.querySelector(".selected-city-relation");
+      if (relationSpan) {
+        relationSpan.textContent = formatTimeRelation(referenceDate, city.timezone);
+      }
+    }
+    return;
+  }
+
   selectedCitiesEl.innerHTML = "";
 
   for (const city of state.selected) {
@@ -910,8 +1119,6 @@ function renderSelectedCities(referenceDate) {
       time.textContent = formatTimeForZone(referenceDate, city.timezone);
     }
 
-    const analog = createAnalogClockElement(referenceDate, city.timezone);
-
     const relation = document.createElement("span");
     relation.className = "selected-city-relation";
     relation.textContent = formatTimeRelation(referenceDate, city.timezone);
@@ -934,15 +1141,52 @@ function renderSelectedCities(referenceDate) {
     del.setAttribute("aria-label", "Delete city");
     del.title = "Delete city";
 
-    li.append(text, time, relation, analog, edit, del);
+    li.append(text, time, relation, edit, del);
     selectedCitiesEl.append(li);
   }
 }
 
 function renderFixedCities(referenceDate) {
+  const renderedCities = getFixedCitiesForRender();
+  const existingItems = Array.from(fixedCitiesListEl.querySelectorAll(".fixed-city-item"));
+  const activeEditInput = fixedCitiesListEl.querySelector(".inline-time-input");
+  let editStateMatches = false;
+  if (state.inlineEdit && state.inlineEdit.type === "fixed") {
+    editStateMatches = activeEditInput !== null &&
+      activeEditInput.closest(".fixed-city-item").dataset.city === state.inlineEdit.name;
+  } else {
+    editStateMatches = activeEditInput === null;
+  }
+
+  const matches = editStateMatches &&
+    existingItems.length === renderedCities.length &&
+    existingItems.every((item, idx) => item.dataset.city === renderedCities[idx].name && item.dataset.timezone === renderedCities[idx].timezone);
+
+  if (matches) {
+    for (let i = 0; i < renderedCities.length; i++) {
+      const city = renderedCities[i];
+      const item = existingItems[i];
+      const isEditing = state.inlineEdit
+        && state.inlineEdit.type === "fixed"
+        && state.inlineEdit.name === city.name;
+
+      if (!isEditing) {
+        const datetimeEl = item.querySelector(".fixed-city-datetime:not(input)");
+        if (datetimeEl) {
+          datetimeEl.textContent = formatTimeForZone(referenceDate, city.timezone);
+        }
+      }
+      const relationDiv = item.querySelector(".fixed-city-relation");
+      if (relationDiv) {
+        relationDiv.textContent = formatTimeRelation(referenceDate, city.timezone);
+      }
+    }
+    return;
+  }
+
   fixedCitiesListEl.innerHTML = "";
 
-  for (const city of getFixedCitiesForRender()) {
+  for (const city of renderedCities) {
     const li = document.createElement("li");
     li.className = "fixed-city-item";
     li.dataset.city = city.name;
@@ -986,8 +1230,6 @@ function renderFixedCities(referenceDate) {
 
     datetime.classList.add("fixed-city-datetime");
 
-    const analog = createAnalogClockElement(referenceDate, city.timezone);
-
     const relation = document.createElement("div");
     relation.className = "fixed-city-relation";
     relation.textContent = formatTimeRelation(referenceDate, city.timezone);
@@ -1001,7 +1243,7 @@ function renderFixedCities(referenceDate) {
     edit.setAttribute("aria-label", isEditing ? `Done editing ${city.name}` : `Edit ${city.name} time`);
     edit.title = isEditing ? `Done editing ${city.name}` : `Edit ${city.name} time`;
 
-    li.append(name, datetime, relation, analog, edit);
+    li.append(name, datetime, relation, edit);
     fixedCitiesListEl.append(li);
   }
 }
@@ -1011,7 +1253,7 @@ function focusFixedCityOnMap(city) {
 
   const referenceDate = getReferenceDate();
   const time = formatDateTimeForZone(referenceDate, city.timezone);
-  const popup = `${escapeHtml(city.name)}<br>${formatTimezone(referenceDate, city.timezone)}<br>${time}<br>${organicMapsLink(city.lat, city.lon, city.name)}`;
+  const popup = `${escapeHtml(city.name)}<br>${formatTimezone(referenceDate, city.timezone)}<br>${time}`;
 
   if (!fixedCityMarker) {
     fixedCityMarker = L.marker([city.lat, city.lon]).addTo(map);
@@ -1052,10 +1294,7 @@ function upsertCurrentMarker() {
   const accuracyLabel = Number.isFinite(state.current.accuracy)
     ? `<br>Accuracy: ${formatAccuracy(state.current.accuracy)}`
     : "";
-  const organicMapsLabel = hasCurrentCoordinates()
-    ? `<br>${organicMapsLink(state.current.lat, state.current.lon, state.current.city)}`
-    : "";
-  const label = `${escapeHtml(state.current.city)}<br>${formatTimezone(getReferenceDate(), state.current.timezone)}${coordsLabel}${accuracyLabel}${organicMapsLabel}`;
+  const label = `${escapeHtml(state.current.city)}<br>${formatTimezone(getReferenceDate(), state.current.timezone)}${coordsLabel}${accuracyLabel}`;
   if (!currentMarker) {
     currentMarker = L.marker(coords, { title: "Current location" }).addTo(map);
   } else {
@@ -1184,7 +1423,7 @@ function focusSelectedCityOnMap(city) {
 
   const referenceDate = getReferenceDate();
   const time = formatDateTimeForZone(referenceDate, city.timezone);
-  const popup = `${escapeHtml(city.name)}<br>${formatTimezone(referenceDate, city.timezone)}<br>${time}<br>${organicMapsLink(city.lat, city.lon, city.name)}`;
+  const popup = `${escapeHtml(city.name)}<br>${formatTimezone(referenceDate, city.timezone)}<br>${time}`;
 
   if (!selectedCityMarker) {
     selectedCityMarker = L.marker([city.lat, city.lon]).addTo(map);
@@ -1294,10 +1533,144 @@ async function searchCity(query) {
   return results[0];
 }
 
+let suggestionTimeout = null;
+let activeSuggestionIndex = -1;
+let currentSuggestions = [];
+
+const suggestionsEl = document.getElementById("search-suggestions");
+
+function showSuggestions(results) {
+  suggestionsEl.innerHTML = "";
+  currentSuggestions = results;
+  activeSuggestionIndex = -1;
+
+  if (results.length === 0) {
+    suggestionsEl.classList.add("hidden");
+    return;
+  }
+
+  for (let i = 0; i < results.length; i++) {
+    const res = results[i];
+    const item = document.createElement("div");
+    item.className = "suggestion-item";
+    item.dataset.index = String(i);
+
+    const name = res.address.city || res.address.town || res.address.village || res.address.suburb || res.name || "Unknown City";
+    const stateCountry = [res.address.state, res.address.country].filter(Boolean).join(", ");
+
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "suggestion-name";
+    nameSpan.textContent = name;
+
+    const descSpan = document.createElement("span");
+    descSpan.className = "suggestion-desc";
+    descSpan.textContent = stateCountry;
+
+    item.append(nameSpan, descSpan);
+
+    item.addEventListener("click", () => selectSuggestion(res));
+    suggestionsEl.append(item);
+  }
+
+  suggestionsEl.classList.remove("hidden");
+}
+
+async function selectSuggestion(res) {
+  const lat = Number(res.lat);
+  const lon = Number(res.lon);
+  const name = res.address.city || res.address.town || res.address.village || res.address.suburb || res.name || citySearchEl.value.trim();
+
+  suggestionsEl.classList.add("hidden");
+  citySearchEl.value = "";
+
+  try {
+    const timezone = await timezoneByCoordinates(lat, lon);
+    addSelectedCity(name, timezone || "UTC", lat, lon);
+    map.setView([lat, lon], Math.max(map.getZoom(), 8));
+    tick();
+  } catch (err) {
+    console.error("Failed to select city suggestion:", err);
+  }
+}
+
+function hideSuggestions() {
+  suggestionsEl.classList.add("hidden");
+  currentSuggestions = [];
+  activeSuggestionIndex = -1;
+}
+
+function updateActiveSuggestion(items) {
+  items.forEach((item, idx) => {
+    if (idx === activeSuggestionIndex) {
+      item.classList.add("selected");
+      item.scrollIntoView({ block: "nearest" });
+    } else {
+      item.classList.remove("selected");
+    }
+  });
+}
+
+citySearchEl.addEventListener("input", () => {
+  const val = citySearchEl.value.trim();
+  clearTimeout(suggestionTimeout);
+
+  if (val.length < 2) {
+    hideSuggestions();
+    return;
+  }
+
+  suggestionTimeout = setTimeout(async () => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&addressdetails=1&q=${encodeURIComponent(val)}`
+      );
+      if (!response.ok) return;
+      const results = await response.json();
+      if (Array.isArray(results)) {
+        showSuggestions(results);
+      }
+    } catch (e) {
+      // ignore suggestion errors
+    }
+  }, 300);
+});
+
 citySearchEl.addEventListener("keydown", (event) => {
-  if (event.key !== "Enter") return;
-  event.preventDefault();
-  searchFormEl.requestSubmit();
+  if (suggestionsEl.classList.contains("hidden")) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      searchFormEl.requestSubmit();
+    }
+    return;
+  }
+
+  const items = suggestionsEl.querySelectorAll(".suggestion-item");
+
+  if (event.key === "ArrowDown") {
+    event.preventDefault();
+    activeSuggestionIndex = (activeSuggestionIndex + 1) % items.length;
+    updateActiveSuggestion(items);
+  } else if (event.key === "ArrowUp") {
+    event.preventDefault();
+    activeSuggestionIndex = (activeSuggestionIndex - 1 + items.length) % items.length;
+    updateActiveSuggestion(items);
+  } else if (event.key === "Enter") {
+    event.preventDefault();
+    if (activeSuggestionIndex >= 0 && activeSuggestionIndex < currentSuggestions.length) {
+      selectSuggestion(currentSuggestions[activeSuggestionIndex]);
+    } else {
+      searchFormEl.requestSubmit();
+    }
+  } else if (event.key === "Escape") {
+    hideSuggestions();
+  }
+});
+
+// Close suggestions when clicking outside
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".search-input-wrapper")) {
+    hideSuggestions();
+  }
 });
 
 searchFormEl.addEventListener("submit", async (event) => {
@@ -1470,21 +1843,6 @@ plannerGridEl.addEventListener("change", (event) => {
   renderMeetingPlanner(getReferenceDate(), true);
 });
 
-function openCurrentLocationInOrganicMaps(event) {
-  if (event) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
-
-  if (!focusStoredCurrentLocation()) return;
-
-  window.open(
-    organicMapsUrl(state.current.lat, state.current.lon, state.current.city),
-    "_blank",
-    "noopener"
-  );
-}
-
 function resetToCurrentTime(event) {
   if (event) {
     event.preventDefault();
@@ -1551,8 +1909,6 @@ function focusMapOnCurrentLocation(event) {
 
 focusCurrentBtnEl.addEventListener("click", focusMapOnCurrentLocation);
 focusCurrentBtnEl.addEventListener("touchend", focusMapOnCurrentLocation, { passive: false });
-openOrganicMapsBtnEl.addEventListener("click", openCurrentLocationInOrganicMaps);
-openOrganicMapsBtnEl.addEventListener("touchend", openCurrentLocationInOrganicMaps, { passive: false });
 
 function applyEditedTimeForTimezone(value, timezone) {
   const targetSeconds = parseHmsToSeconds(value.trim());
@@ -1585,6 +1941,44 @@ editTimeOnlyEl.addEventListener("input", () => {
   }
   editErrorEl.textContent = "";
   if (updated) tick();
+});
+
+// Tab toggling for search modes
+const tabSearchName = document.getElementById("tab-search-name");
+const tabSearchCoords = document.getElementById("tab-search-coords");
+
+tabSearchName.addEventListener("click", () => {
+  tabSearchName.classList.add("active");
+  tabSearchCoords.classList.remove("active");
+  searchFormEl.classList.remove("hidden");
+  coordsFormEl.classList.add("hidden");
+});
+
+tabSearchCoords.addEventListener("click", () => {
+  tabSearchCoords.classList.add("active");
+  tabSearchName.classList.remove("active");
+  coordsFormEl.classList.remove("hidden");
+  searchFormEl.classList.add("hidden");
+});
+
+// Tab toggling for lists below map
+const tabSelectedCities = document.getElementById("tab-selected-cities");
+const tabFixedCities = document.getElementById("tab-fixed-cities");
+const selectedShell = document.querySelector(".selected-shell");
+const fixedCities = document.querySelector(".fixed-cities");
+
+tabSelectedCities.addEventListener("click", () => {
+  tabSelectedCities.classList.add("active");
+  tabFixedCities.classList.remove("active");
+  selectedShell.classList.remove("hidden");
+  fixedCities.classList.add("hidden");
+});
+
+tabFixedCities.addEventListener("click", () => {
+  tabFixedCities.classList.add("active");
+  tabSelectedCities.classList.remove("active");
+  fixedCities.classList.remove("hidden");
+  selectedShell.classList.add("hidden");
 });
 
 tick();

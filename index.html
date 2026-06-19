@@ -16,10 +16,17 @@
   <main class="app">
     <aside class="left-panel" aria-label="Current location">
       <h2>Current Location</h2>
-      <p id="current-time" class="current-time">--</p>
       <p id="current-city" class="current-row">City: --</p>
       <p id="current-timezone" class="current-row">Timezone: --</p>
       <p id="current-coords" class="current-row">Lat, Long: --</p>
+
+      <div class="current-clocks-row">
+        <div class="current-time-container">
+          <div id="current-date" class="current-date">--</div>
+          <div id="current-time" class="current-time-flip"></div>
+        </div>
+        <div id="current-analog-clock" class="widget-card widget-clock"></div>
+      </div>
 
       <label class="timezone-format-control">Timezone Format
         <select id="timezone-format">
@@ -34,7 +41,6 @@
         <button id="edit-location-btn" class="icon-btn" type="button" aria-label="Edit current time">✎</button>
         <button id="reset-time-btn" class="icon-btn" type="button" aria-label="Back to current time">↺</button>
         <button id="focus-current-btn" class="icon-btn" type="button" aria-label="Go to current location">📍</button>
-        <button id="open-organic-maps-btn" class="icon-btn organic-maps-btn" type="button" aria-label="Open current location in Organic Maps" title="Open current location in Organic Maps">OM</button>
       </div>
 
       <div id="edit-location-form" class="edit-form hidden">
@@ -43,15 +49,25 @@
         </label>
         <p id="edit-error" class="edit-error"></p>
       </div>
+
+      <div id="current-calendar" class="widget-card widget-calendar"></div>
     </aside>
 
     <section class="right-panel">
+      <div class="search-tabs">
+        <button type="button" class="search-tab active" id="tab-search-name">Search by Name</button>
+        <button type="button" class="search-tab" id="tab-search-coords">Add by Coordinates</button>
+      </div>
+
       <form id="search-form" class="search-form" autocomplete="off">
-        <input id="city-search" type="search" placeholder="Search city (e.g. Tokyo)" required />
+        <div class="search-input-wrapper">
+          <input id="city-search" type="search" placeholder="Add City to Meeting Planner" required />
+          <div id="search-suggestions" class="search-suggestions hidden"></div>
+        </div>
         <button class="search-add-btn" type="submit" aria-label="Add city" title="Add city">+</button>
       </form>
 
-      <form id="coords-form" class="coords-form" autocomplete="off">
+      <form id="coords-form" class="coords-form hidden" autocomplete="off">
         <input id="lat-input" type="text" inputmode="decimal" placeholder="Latitude" required />
         <input id="lon-input" type="text" inputmode="decimal" placeholder="Longitude" required />
         <button class="search-add-btn" type="submit" aria-label="Add by coordinates" title="Add by coordinates">◎</button>
@@ -61,10 +77,10 @@
         <div class="planner-header">
           <div>
             <div class="planner-title-row">
-              <h3>Meeting Planner</h3>
+              <h3>Timezone Meeting Planner</h3>
               <div class="planner-legend" aria-label="Timing legend">
                 <span><i class="legend-dot ideal"></i>Ideal</span>
-                <span><i class="legend-dot manage"></i>Can manage</span>
+                <span><i class="legend-dot manage"></i>Can Manage</span>
                 <span><i class="legend-dot bad"></i>Not good</span>
               </div>
             </div>
@@ -90,13 +106,16 @@
       </section>
 
       <section class="below-map" aria-label="City times">
+        <div class="below-map-tabs">
+          <button type="button" class="below-map-tab active" id="tab-selected-cities">Selected Cities</button>
+          <button type="button" class="below-map-tab" id="tab-fixed-cities">Default Cities</button>
+        </div>
+
         <section class="selected-shell" aria-label="Selected cities">
-          <h3>Selected Cities</h3>
           <ul id="selected-cities" class="selected-cities"></ul>
         </section>
 
-        <section class="fixed-cities" aria-label="Key cities">
-          <h3>City Times</h3>
+        <section class="fixed-cities hidden" aria-label="Key cities">
           <ul id="fixed-cities-list" class="fixed-cities-list"></ul>
         </section>
       </section>
