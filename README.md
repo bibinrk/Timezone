@@ -1,13 +1,13 @@
-Creating applications to do one task well. Keeping the application to its bare minimal features. 
+Creating applications to do one task well. Keeping the application to its bare minimal features. The timezone converter and Meeting Planner app is my first project keeping this principle of minimalistic requirements.
 
 Timezone Converter:
-The timezone converter and Meeting Planner app is my first project keeping this principle of minimalistic requirements. It shows times in different timezones based on user entry of current location or a desired location.
+The timezone converter section shows times in different timezones and based on user entry of current location or a desired location shows what the time is in the other cities.
 It is 24hours only.
 You can choose between GMT and UTC. DST is inbuilt and if its applicable will automatically apply and will be displayed. 
 It has a map to understand geographically where is the location to those users who havent travelled to that place or isnt well aware with geography.
 
 Meeting Planner:
-Add cities to the meeting planner and it will indicate what timings are ideal, can manage and drowsy automatically. You can set your meeting planner time based on your Meeting timings. This could be outside your office timings as well. Its based on what you set as the meeting planner times.
+Add cities to the meeting planner and it will indicate what timings are ideal, can manage and drowsy automatically. You can set your meeting planner time based on your Meeting timings. This could be outside your office timings as well. Its based on what you set as the meeting planner times. You have a time slider to slide from your current time to a desired time to see what the time would be in the other cities.
 
 Home:
 <img width="1584" height="789" alt="Home" src="https://github.com/user-attachments/assets/48c2089a-39d2-4fdc-9909-71f1d2c502a2" />
