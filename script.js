@@ -24,7 +24,6 @@ const focusCurrentBtnEl = document.getElementById("focus-current-btn");
 const timezoneFormatEl = document.getElementById("timezone-format");
 const meetingDurationEl = document.getElementById("meeting-duration");
 const toggleMapConnectionsEl = document.getElementById("toggle-map-connections");
-const mapFocusSelectEl = document.getElementById("map-focus-select");
 const plannerCalendarEl = document.getElementById("planner-calendar");
 const plannerBestTimesEl = document.getElementById("planner-best-times");
 const plannerGridEl = document.getElementById("planner-grid");
@@ -434,7 +433,7 @@ function getPlannerZones() {
 function plannerStatusText(status) {
   if (status === "ideal") return "Ideal";
   if (status === "manage") return "Can Manage";
-  return "Not good";
+  return "Drowsy";
 }
 
 function scorePlannerSlotForZone(slotDate, zone, durationMinutes) {
@@ -920,16 +919,26 @@ function renderPlannerBestTimes(dateParts, zones) {
   }
 }
 
-function appendPlannerGridHeader() {
+function appendPlannerGridHeader(dateParts) {
   const corner = document.createElement("div");
   corner.className = "planner-grid-label";
   corner.textContent = "Local hour";
   plannerGridEl.append(corner);
 
+  const referenceDate = getReferenceDate();
+  const currentParts = getDatePartsForZone(referenceDate, state.current.timezone);
+  const isSameDay = currentParts.year === dateParts.year &&
+                    currentParts.month === dateParts.month &&
+                    currentParts.day === dateParts.day;
+  const currentHour = getHmsPartsForZone(referenceDate, state.current.timezone).hour;
+
   for (const hour of PLANNER_HOURS) {
     const hourLabel = document.createElement("div");
-    hourLabel.className = "planner-hour-label";
+    const isActive = isSameDay && hour === currentHour;
+    hourLabel.className = `planner-hour-label clickable-hour${isActive ? " active-hour" : ""}`;
     hourLabel.textContent = pad2(hour);
+    hourLabel.dataset.hour = hour;
+    hourLabel.title = `Click to set time to ${pad2(hour)}:00`;
     plannerGridEl.append(hourLabel);
   }
 }
@@ -998,22 +1007,61 @@ function appendPlannerZoneRow(dateParts, zone) {
   end.setAttribute("aria-label", `${zone.name} Meeting End`);
 
   office.append(start, separator, end);
-  label.append(title, timezone, office);
+
+  const referenceDate = getReferenceDate();
+
+  const sliderContainer = document.createElement("div");
+  sliderContainer.className = "planner-location-slider-container";
+
+  const localTimeParts = getHmsPartsForZone(referenceDate, zone.timezone);
+  const totalMinutes = (localTimeParts.hour * 60) + localTimeParts.minute;
+
+  const slider = document.createElement("input");
+  slider.type = "range";
+  slider.className = "location-time-slider";
+  slider.min = "0";
+  slider.max = "1439";
+  slider.step = "15";
+  slider.value = String(totalMinutes);
+  slider.dataset.timezone = zone.timezone;
+  slider.title = `Drag to change time for ${zone.name}`;
+
+  const display = document.createElement("span");
+  display.className = "location-time-display";
+  display.textContent = `${pad2(localTimeParts.hour)}:${pad2(localTimeParts.minute)}`;
+
+  sliderContainer.append(slider, display);
+
+  label.append(title, timezone, sliderContainer, office);
   plannerGridEl.append(label);
+
+  const currentParts = getDatePartsForZone(referenceDate, state.current.timezone);
+  const isSameDay = currentParts.year === dateParts.year &&
+                    currentParts.month === dateParts.month &&
+                    currentParts.day === dateParts.day;
+  const currentHour = getHmsPartsForZone(referenceDate, state.current.timezone).hour;
 
   for (const hour of PLANNER_HOURS) {
     const slotDate = getPlannerSlotDate(dateParts, hour);
     const status = scorePlannerSlotForZone(slotDate, zone, state.planner.durationMinutes);
-    plannerGridEl.append(createPlannerCell(
+    const isActive = isSameDay && hour === currentHour;
+    
+    const cell = createPlannerCell(
       status.status,
       `${zone.name}: ${status.localTime} - ${plannerStatusText(status.status)}`
-    ));
+    );
+    cell.classList.add("clickable-cell");
+    if (isActive) {
+      cell.classList.add("active-hour");
+    }
+    cell.dataset.hour = hour;
+    plannerGridEl.append(cell);
   }
 }
 
 function renderPlannerGrid(dateParts, zones) {
   plannerGridEl.innerHTML = "";
-  appendPlannerGridHeader();
+  appendPlannerGridHeader(dateParts);
 
   for (const zone of zones) {
     appendPlannerZoneRow(dateParts, zone);
@@ -1028,6 +1076,55 @@ function renderMeetingPlanner(referenceDate, force = false) {
   renderPlannerCalendar(referenceDate, zones, dateParts);
   renderPlannerBestTimes(dateParts, zones);
   renderPlannerGrid(dateParts, zones);
+}
+
+function updateLocationSliders(referenceDate) {
+  const sliders = plannerGridEl.querySelectorAll(".location-time-slider");
+  sliders.forEach(slider => {
+    const timezone = slider.dataset.timezone;
+    const localTimeParts = getHmsPartsForZone(referenceDate, timezone);
+    const totalMinutes = (localTimeParts.hour * 60) + localTimeParts.minute;
+
+    if (document.activeElement !== slider) {
+      slider.value = totalMinutes;
+    }
+
+    const display = slider.nextElementSibling;
+    if (display && display.classList.contains("location-time-display")) {
+      display.textContent = `${pad2(localTimeParts.hour)}:${pad2(localTimeParts.minute)}`;
+    }
+  });
+}
+
+function updatePlannerTimeHighlights(referenceDate) {
+  const dateParts = getPlannerDateParts(referenceDate);
+  const currentParts = getDatePartsForZone(referenceDate, state.current.timezone);
+  const isSameDay = currentParts.year === dateParts.year &&
+                    currentParts.month === dateParts.month &&
+                    currentParts.day === dateParts.day;
+  const currentHour = getHmsPartsForZone(referenceDate, state.current.timezone).hour;
+
+  const hourLabels = plannerGridEl.querySelectorAll(".planner-hour-label");
+  hourLabels.forEach(label => {
+    const hour = Number(label.dataset.hour);
+    const isActive = isSameDay && hour === currentHour;
+    if (isActive) {
+      label.classList.add("active-hour");
+    } else {
+      label.classList.remove("active-hour");
+    }
+  });
+
+  const cells = plannerGridEl.querySelectorAll(".planner-cell");
+  cells.forEach(cell => {
+    const hour = Number(cell.dataset.hour);
+    const isActive = isSameDay && hour === currentHour;
+    if (isActive) {
+      cell.classList.add("active-hour");
+    } else {
+      cell.classList.remove("active-hour");
+    }
+  });
 }
 
 function refreshTimezoneDisplay() {
@@ -1278,7 +1375,6 @@ function tick() {
   }
   renderMeetingPlanner(referenceDate);
   updateMapConnections();
-  updateMapFocusDropdownState();
 }
 
 function getReferenceDate() {
@@ -1383,44 +1479,6 @@ function updateMapConnectionsPopupTimes() {
   });
 }
 
-function updateMapFocus() {
-  if (!map) return;
-  const focus = mapFocusSelectEl ? mapFocusSelectEl.value : "current";
-
-  if (focus === "current") {
-    if (typeof state.current.lat === "number" && typeof state.current.lon === "number") {
-      map.setView([state.current.lat, state.current.lon], 12);
-      upsertCurrentMarker();
-      if (currentMarker) {
-        currentMarker.openPopup();
-      }
-    }
-  } else if (focus === "selected") {
-    const bounds = [];
-    state.selected.forEach((city) => {
-      if (typeof city.lat === "number" && typeof city.lon === "number") {
-        bounds.push([city.lat, city.lon]);
-      }
-    });
-
-    if (bounds.length > 0) {
-      map.fitBounds(bounds, { padding: [40, 40] });
-    }
-  }
-}
-
-function updateMapFocusDropdownState() {
-  if (!mapFocusSelectEl) return;
-  const selectedOption = mapFocusSelectEl.querySelector('option[value="selected"]');
-  if (selectedOption) {
-    const hasSelected = state.selected.length > 0;
-    selectedOption.disabled = !hasSelected;
-    if (!hasSelected && mapFocusSelectEl.value === "selected") {
-      mapFocusSelectEl.value = "current";
-      updateMapFocus();
-    }
-  }
-}
 
 function upsertCurrentMarker() {
   if (typeof state.current.lat !== "number" || typeof state.current.lon !== "number") return;
@@ -1975,9 +2033,6 @@ toggleMapConnectionsEl.addEventListener("change", () => {
   updateMapConnections(true);
 });
 
-mapFocusSelectEl.addEventListener("change", () => {
-  updateMapFocus();
-});
 
 plannerCalendarEl.addEventListener("click", (event) => {
   const day = event.target.closest(".planner-day");
@@ -2000,6 +2055,65 @@ plannerGridEl.addEventListener("change", (event) => {
   const nextValue = input.value.trim();
   officeHours[field] = parseTimeToMinutes(nextValue) === null ? fallback : nextValue;
   renderMeetingPlanner(getReferenceDate(), true);
+});
+
+
+plannerGridEl.addEventListener("input", (event) => {
+  const slider = event.target.closest(".location-time-slider");
+  if (!slider) return;
+
+  const val = Number(slider.value);
+  const hours = Math.floor(val / 60);
+  const minutes = val % 60;
+  const timezone = slider.dataset.timezone;
+
+  const referenceDate = getReferenceDate();
+  const dateParts = getPlannerDateParts(referenceDate);
+  const targetMs = zonedDateTimeToUtcMs(dateParts, hours, minutes, timezone);
+
+  state.current.manualBaseUtcMs = targetMs;
+  state.current.manualSetAtMs = Date.now();
+
+  const nextDate = getReferenceDate();
+  renderCurrentLocation(nextDate);
+  renderFixedCities(nextDate);
+  renderSelectedCities(nextDate);
+  upsertCurrentMarker();
+  if (!editFormEl.classList.contains("hidden")) {
+    renderEditTargetLabel(nextDate);
+  }
+
+  // Update in-place to keep drag focus
+  updateLocationSliders(nextDate);
+  updatePlannerTimeHighlights(nextDate);
+});
+
+plannerGridEl.addEventListener("click", (event) => {
+  const target = event.target.closest(".clickable-hour, .clickable-cell");
+  if (!target) return;
+
+  const hour = Number(target.dataset.hour);
+  if (!Number.isFinite(hour)) return;
+
+  const referenceDate = getReferenceDate();
+  const dateParts = getPlannerDateParts(referenceDate);
+  const targetMs = zonedDateTimeToUtcMs(dateParts, hour, 0, state.current.timezone);
+
+  state.current.manualBaseUtcMs = targetMs;
+  state.current.manualSetAtMs = Date.now();
+
+  const nextDate = getReferenceDate();
+  renderCurrentLocation(nextDate);
+  renderFixedCities(nextDate);
+  renderSelectedCities(nextDate);
+  upsertCurrentMarker();
+  if (!editFormEl.classList.contains("hidden")) {
+    renderEditTargetLabel(nextDate);
+  }
+
+  // Update in-place to avoid rebuilding the grid
+  updateLocationSliders(nextDate);
+  updatePlannerTimeHighlights(nextDate);
 });
 
 function resetToCurrentTime(event) {
