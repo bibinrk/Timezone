@@ -27,6 +27,7 @@ const toggleMapConnectionsEl = document.getElementById("toggle-map-connections")
 const plannerCalendarEl = document.getElementById("planner-calendar");
 const plannerBestTimesEl = document.getElementById("planner-best-times");
 const plannerGridEl = document.getElementById("planner-grid");
+const addCurrentLocationBtn = document.getElementById("add-current-location-btn");
 
 const map = L.map(mapEl, {
   zoomControl: false,
@@ -79,7 +80,8 @@ const state = {
   planner: {
     selectedDateKey: null,
     durationMinutes: 60,
-    officeHours: {}
+    officeHours: {},
+    excludeCurrentLocation: false
   },
   selected: [],
   fixedExtra: []
@@ -407,14 +409,15 @@ function getPlannerDateParts(referenceDate) {
   return parseDateKey(state.planner.selectedDateKey) || todayParts;
 }
 
-function addPlannerZone(zones, seenTimezones, name, timezone) {
+function addPlannerZone(zones, seenTimezones, name, timezone, isCurrent = false) {
   if (!timezone || seenTimezones.has(timezone)) return;
 
   seenTimezones.add(timezone);
   zones.push({
     key: timezone,
     name: name || timezone,
-    timezone
+    timezone,
+    isCurrent
   });
 }
 
@@ -422,9 +425,11 @@ function getPlannerZones() {
   const zones = [];
   const seenTimezones = new Set();
 
-  addPlannerZone(zones, seenTimezones, state.current.city, state.current.timezone);
+  if (!state.planner.excludeCurrentLocation) {
+    addPlannerZone(zones, seenTimezones, state.current.city, state.current.timezone, true);
+  }
   for (const city of state.selected) {
-    addPlannerZone(zones, seenTimezones, city.name, city.timezone);
+    addPlannerZone(zones, seenTimezones, city.name, city.timezone, false);
   }
 
   return zones;
@@ -972,9 +977,40 @@ function appendPlannerZoneRow(dateParts, zone) {
   const label = document.createElement("div");
   label.className = "planner-grid-label";
 
+  const headerRow = document.createElement("div");
+  headerRow.className = "planner-zone-header-row";
+
   const title = document.createElement("span");
   title.className = "planner-zone-title";
   title.textContent = zone.name;
+  headerRow.append(title);
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.type = "button";
+  deleteBtn.className = "planner-zone-delete-btn";
+  deleteBtn.innerHTML = "🗑";
+
+  if (zone.isCurrent) {
+    deleteBtn.title = "Delete Current Location from planner";
+    deleteBtn.setAttribute("aria-label", "Delete Current Location from planner");
+    deleteBtn.addEventListener("click", () => {
+      state.planner.excludeCurrentLocation = true;
+      state.selected = state.selected.filter(
+        (city) => city.timezone !== zone.timezone
+      );
+      tick(true);
+    });
+  } else {
+    deleteBtn.title = `Delete ${zone.name} from planner`;
+    deleteBtn.setAttribute("aria-label", `Delete ${zone.name} from planner`);
+    deleteBtn.addEventListener("click", () => {
+      state.selected = state.selected.filter(
+        (city) => city.timezone !== zone.timezone
+      );
+      tick(true);
+    });
+  }
+  headerRow.append(deleteBtn);
 
   const timezone = document.createElement("span");
   timezone.className = "planner-zone-tz";
@@ -1032,7 +1068,7 @@ function appendPlannerZoneRow(dateParts, zone) {
 
   sliderContainer.append(slider, display);
 
-  label.append(title, timezone, sliderContainer, office);
+  label.append(headerRow, timezone, sliderContainer, office);
   plannerGridEl.append(label);
 
   const currentParts = getDatePartsForZone(referenceDate, state.current.timezone);
@@ -1076,6 +1112,14 @@ function renderMeetingPlanner(referenceDate, force = false) {
   renderPlannerCalendar(referenceDate, zones, dateParts);
   renderPlannerBestTimes(dateParts, zones);
   renderPlannerGrid(dateParts, zones);
+
+  if (addCurrentLocationBtn) {
+    if (state.planner.excludeCurrentLocation) {
+      addCurrentLocationBtn.classList.remove("hidden");
+    } else {
+      addCurrentLocationBtn.classList.add("hidden");
+    }
+  }
 }
 
 function updateLocationSliders(referenceDate) {
@@ -1366,15 +1410,15 @@ function focusFixedCityOnMap(city) {
   map.setView([city.lat, city.lon], 9);
 }
 
-function tick() {
+function tick(force = false) {
   const referenceDate = getReferenceDate();
   renderCurrentLocation(referenceDate);
   if (!state.inlineEdit) {
     renderFixedCities(referenceDate);
     renderSelectedCities(referenceDate);
   }
-  renderMeetingPlanner(referenceDate);
-  updateMapConnections();
+  renderMeetingPlanner(referenceDate, force);
+  updateMapConnections(force);
 }
 
 function getReferenceDate() {
@@ -2028,6 +2072,13 @@ meetingDurationEl.addEventListener("change", (event) => {
   state.planner.durationMinutes = duration;
   renderMeetingPlanner(getReferenceDate(), true);
 });
+
+if (addCurrentLocationBtn) {
+  addCurrentLocationBtn.addEventListener("click", () => {
+    state.planner.excludeCurrentLocation = false;
+    tick(true);
+  });
+}
 
 toggleMapConnectionsEl.addEventListener("change", () => {
   updateMapConnections(true);

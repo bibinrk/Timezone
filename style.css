@@ -612,6 +612,35 @@ button:active {
   accent-color: var(--accent);
 }
 
+.planner-add-current-btn {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  border-radius: 10px !important;
+  padding: 8px 12px !important;
+  color: #93c5fd !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  height: fit-content !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.planner-add-current-btn:hover {
+  background: rgba(59, 130, 246, 0.2) !important;
+  border-color: var(--accent) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+}
+
+.planner-add-current-btn:active {
+  transform: translateY(0) !important;
+}
+
 .planner-duration-control {
   min-width: 96px;
   display: grid;
@@ -751,12 +780,49 @@ button:active {
   justify-content: center;
 }
 
+.planner-zone-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  width: 100%;
+}
+
 .planner-zone-title {
+  flex: 1;
+  min-width: 0;
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 700;
+}
+
+.planner-zone-delete-btn {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  color: var(--muted) !important;
+  font-size: 0.85rem !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  transition: color 0.2s ease, transform 0.1s ease !important;
+  box-shadow: none !important;
+}
+
+.planner-zone-delete-btn:hover {
+  color: #ff453a !important;
+  background: transparent !important;
+  transform: scale(1.15) !important;
+}
+
+.planner-zone-delete-btn:active {
+  transform: scale(0.95) !important;
 }
 
 .planner-zone-tz {
