@@ -26,6 +26,7 @@ const meetingDurationEl = document.getElementById("meeting-duration");
 const toggleMapConnectionsEl = document.getElementById("toggle-map-connections");
 const plannerCalendarEl = document.getElementById("planner-calendar");
 const plannerBestTimesEl = document.getElementById("planner-best-times");
+const plannerBestTimesHeaderEl = document.getElementById("planner-best-times-header");
 const plannerGridEl = document.getElementById("planner-grid");
 const addCurrentLocationBtn = document.getElementById("add-current-location-btn");
 
@@ -79,7 +80,7 @@ const state = {
   inlineEdit: null,
   planner: {
     selectedDateKey: null,
-    durationMinutes: 60,
+    durationMinutes: 30,
     officeHours: {},
     excludeCurrentLocation: false
   },
@@ -497,7 +498,8 @@ function getRecommendedPlannerSlots(dateParts, zones) {
   const idealSlots = slots.filter((slot) => slot.status === "ideal");
   const manageableSlots = slots.filter((slot) => slot.status === "manage");
 
-  return (idealSlots.length > 0 ? idealSlots : manageableSlots).slice(0, 4);
+  const combined = [...idealSlots, ...manageableSlots];
+  return combined.slice(0, 4);
 }
 
 function getPlannerDayStatus(dateParts, zones) {
@@ -877,6 +879,11 @@ function renderPlannerCalendar(referenceDate, zones, selectedDateParts) {
 function renderPlannerBestTimes(dateParts, zones) {
   plannerBestTimesEl.innerHTML = "";
 
+  if (plannerBestTimesHeaderEl) {
+    plannerBestTimesHeaderEl.textContent = "";
+    plannerBestTimesHeaderEl.classList.add("hidden");
+  }
+
   if (zones.length < 2) {
     return;
   }
@@ -890,38 +897,52 @@ function renderPlannerBestTimes(dateParts, zones) {
     return;
   }
 
+  // Create layout container
+  const layout = document.createElement("div");
+  layout.className = "planner-best-times-layout";
+
+  // Create sidebar for city names
+  const sidebar = document.createElement("div");
+  sidebar.className = "best-times-sidebar";
+
+  zones.forEach(zone => {
+    const cityDiv = document.createElement("div");
+    cityDiv.className = "best-times-sidebar-city";
+    cityDiv.textContent = zone.name;
+    sidebar.append(cityDiv);
+  });
+
+  const statusLabel = document.createElement("div");
+  statusLabel.className = "best-times-sidebar-status-lbl";
+  statusLabel.textContent = "Status";
+  sidebar.append(statusLabel);
+
+  // Create container for the columns of chips
+  const columns = document.createElement("div");
+  columns.className = "best-times-columns";
+
   for (const slot of recommendedSlots) {
     const chip = document.createElement("div");
     chip.className = `best-time-chip status-${slot.status}`;
     chip.title = slot.title;
 
-    if (zones.length > 1) {
-      const zonesContainer = document.createElement("div");
-      zonesContainer.className = "best-time-zones";
+    zones.forEach(zone => {
+      const timeDiv = document.createElement("div");
+      timeDiv.className = "best-time-chip-time";
+      timeDiv.textContent = formatPlannerSlotLabelForZone(slot.slotDate, state.planner.durationMinutes, zone.timezone);
+      chip.append(timeDiv);
+    });
 
-      for (const zone of zones) {
-        const nameSpan = document.createElement("span");
-        nameSpan.className = "best-time-zone-name";
-        nameSpan.textContent = zone.name;
+    const statusDiv = document.createElement("div");
+    statusDiv.className = "best-time-status";
+    statusDiv.textContent = plannerStatusText(slot.status);
 
-        const timeSpan = document.createElement("span");
-        timeSpan.className = "best-time-zone-time";
-        timeSpan.textContent = formatPlannerSlotLabelForZone(slot.slotDate, state.planner.durationMinutes, zone.timezone);
-
-        zonesContainer.append(nameSpan, timeSpan);
-      }
-
-      const statusDiv = document.createElement("div");
-      statusDiv.className = "best-time-status";
-      statusDiv.textContent = plannerStatusText(slot.status);
-
-      chip.append(zonesContainer, statusDiv);
-    } else {
-      chip.textContent = `${formatPlannerSlotLabel(slot.slotDate, state.planner.durationMinutes)} ${plannerStatusText(slot.status)}`;
-    }
-
-    plannerBestTimesEl.append(chip);
+    chip.append(statusDiv);
+    columns.append(chip);
   }
+
+  layout.append(sidebar, columns);
+  plannerBestTimesEl.append(layout);
 }
 
 function appendPlannerGridHeader(dateParts) {

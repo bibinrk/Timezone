@@ -36,9 +36,12 @@
   box-sizing: border-box;
 }
 
+body, button, input, select, textarea {
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: var(--ink);
   background:
     radial-gradient(900px 560px at 88% -12%, rgba(161, 188, 152, 0.15), transparent 60%),
@@ -129,7 +132,7 @@ body {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 1.15rem;
   font-weight: 800;
   color: var(--ink);
@@ -241,7 +244,7 @@ body {
 }
 
 .widget-calendar {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: var(--ink);
   align-items: stretch;
   justify-content: flex-start;
@@ -522,6 +525,12 @@ button:active {
   transition: all 0.2s ease;
 }
 
+#city-search {
+  width: 100%;
+  font-size: 0.98rem;
+  padding: 12px 16px;
+}
+
 #city-search:focus,
 .coords-form input:focus,
 .edit-form input:focus,
@@ -542,12 +551,13 @@ button:active {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
-  align-items: start;
+  align-items: center;
 }
 
 .planner-title-row {
   display: flex;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 12px 16px;
   align-items: center;
   justify-content: space-between;
   min-width: 0;
@@ -555,29 +565,30 @@ button:active {
 
 .planner-title-row h3 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1.35rem;
   font-weight: 700;
 }
 
 .planner-legend {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 12px 20px;
 }
 
 .planner-legend span {
   display: inline-flex;
   align-items: center;
-  font-size: 0.72rem;
+  font-size: 0.88rem;
   color: var(--muted);
 }
 
 .legend-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 999px;
   display: inline-block;
-  margin-right: 5px;
+  margin-right: 6px;
 }
 
 .legend-dot.ideal {
@@ -598,7 +609,7 @@ button:active {
 .planner-controls {
   display: flex;
   gap: 12px;
-  align-items: flex-end;
+  align-items: center;
 }
 
 .planner-map-toggle {
@@ -606,7 +617,7 @@ button:active {
   align-items: center;
   gap: 8px;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
   user-select: none;
@@ -635,7 +646,7 @@ button:active {
   border-radius: 10px !important;
   padding: 8px 12px !important;
   color: var(--accent) !important;
-  font-size: 0.72rem !important;
+  font-size: 0.88rem !important;
   font-weight: 600 !important;
   cursor: pointer !important;
   transition: all 0.2s ease !important;
@@ -659,73 +670,135 @@ button:active {
 }
 
 .planner-duration-control {
-  min-width: 96px;
-  display: grid;
-  gap: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.88rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .planner-duration-control select {
   padding: 8px 10px;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
+}
+
+.planner-best-times-header {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin-top: 14px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .planner-best-times {
   margin-top: 8px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 6px;
 }
 
-.best-time-chip {
-  min-width: 0;
-  border-radius: 10px;
-  padding: 8px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  color: #f8fbff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  text-align: center;
+.planner-best-times-layout {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  width: 100%;
+}
+
+.best-times-sidebar {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  min-width: 100px;
+  max-width: 150px;
+  padding-top: 6px;
+  padding-bottom: 6px;
   gap: 4px;
 }
 
-.best-time-zones {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 2px 8px;
-  width: 100%;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  padding-bottom: 4px;
-  margin-bottom: 2px;
-}
-
-.best-time-zone-name {
-  text-align: left;
+.best-times-sidebar-city {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  height: 20px;
+  display: flex;
+  align-items: center;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 500;
-  opacity: 0.9;
 }
 
-.best-time-zone-time {
-  text-align: right;
+.best-times-sidebar-status-lbl {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  border-top: 1px dashed var(--border);
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
+.best-times-columns {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+}
+
+.best-time-chip {
+  flex: 1;
+  min-width: 85px;
+  border-radius: 8px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #f8fbff;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.best-times-columns > .best-time-chip:only-child {
+  flex: 0 1 auto;
+  width: fit-content;
+  min-width: 110px;
+}
+
+.best-time-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.best-time-chip-time {
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 0.8rem;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
 
 .best-time-status {
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 800;
   opacity: 0.9;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px dashed rgba(255, 255, 255, 0.25);
+  margin-top: 4px;
+  padding-top: 4px;
 }
 
 .planner-calendar {
@@ -758,14 +831,14 @@ button:active {
 }
 
 .planner-day-dow {
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   color: var(--ink);
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
 
 .planner-day-date {
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--ink);
 }
@@ -785,13 +858,13 @@ button:active {
 }
 
 .planner-grid-label {
-  min-height: 22px;
+  min-height: 28px;
   border-radius: 6px;
-  padding: 4px 6px;
+  padding: 6px 8px;
   background: rgba(210, 220, 182, 0.55);
   color: var(--muted);
-  font-size: 0.72rem;
-  line-height: 1.1;
+  font-size: 0.88rem;
+  line-height: 1.15;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -809,10 +882,9 @@ button:active {
   flex: 1;
   min-width: 0;
   display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   font-weight: 700;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .planner-zone-delete-btn {
@@ -833,7 +905,7 @@ button:active {
 }
 
 .planner-zone-delete-btn:hover {
-  color: var(--ctp-red) !important;
+  color: var(--ch-terracotta) !important;
   background: transparent !important;
   transform: scale(1.15) !important;
 }
@@ -848,7 +920,7 @@ button:active {
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--muted);
-  font-size: 0.66rem;
+  font-size: 0.78rem;
 }
 
 .planner-location-slider-container {
@@ -898,10 +970,10 @@ button:active {
 }
 
 .location-time-display {
-  font-family: monospace;
-  font-size: 0.68rem;
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.8rem;
   font-weight: 700;
-  color: var(--ctp-text);
+  color: var(--ink);
   min-width: 32px;
   text-align: right;
 }
@@ -915,7 +987,7 @@ button:active {
 }
 
 .planner-office-hours span {
-  font-size: 0.64rem;
+  font-size: 0.78rem;
   color: var(--muted);
   text-align: center;
 }
@@ -923,20 +995,20 @@ button:active {
 .office-time-input {
   border-radius: 6px !important;
   padding: 3px 5px !important;
-  font-size: 0.68rem !important;
+  font-size: 0.8rem !important;
   text-align: center;
   background: rgba(241, 243, 224, 0.8) !important;
   border-color: var(--border) !important;
 }
 
 .planner-hour-label {
-  min-height: 22px;
+  min-height: 28px;
   border-radius: 6px;
   display: grid;
   place-items: center;
   color: var(--muted);
   background: rgba(0, 0, 0, 0.03);
-  font-size: 0.58rem;
+  font-size: 0.76rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -960,10 +1032,11 @@ button:active {
 }
 
 .planner-cell {
-  min-height: 22px;
-  border-radius: 6px;
+  height: 22px;
+  border-radius: 5px;
   border: 1px solid rgba(0, 0, 0, 0.04);
   transition: all 0.2s ease;
+  align-self: center;
 }
 
 .planner-cell.clickable-cell {
@@ -977,7 +1050,7 @@ button:active {
 
 .planner-cell:hover {
   filter: brightness(1.18);
-  transform: scale(1.05);
+  transform: scale(1.15);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
@@ -1278,7 +1351,7 @@ button:active {
   width: 1.5px;
   height: 22px;
   background: var(--clock-red);
-  box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.15);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
 }
 
 .analog-clock .center {
@@ -1323,16 +1396,18 @@ button:active {
 
   .planner-grid-label {
     padding: 4px;
-    font-size: 0.66rem;
-  }
-
-  .planner-hour-label,
-  .planner-cell {
-    min-height: 16px;
-    border-radius: 4px;
+    font-size: 0.76rem;
   }
 
   .planner-hour-label {
-    font-size: 0.48rem;
+    min-height: 20px;
+    border-radius: 4px;
+    font-size: 0.58rem;
+  }
+
+  .planner-cell {
+    height: 16px;
+    border-radius: 4px;
+    align-self: center;
   }
 }
