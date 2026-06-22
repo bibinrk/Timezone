@@ -800,8 +800,8 @@ function renderMiniCalendar(containerEl, referenceDate) {
 }
 
 function renderCurrentLocation(referenceDate) {
-  const hm = formatTimeHmForZone(referenceDate, state.current.timezone);
-  updateFlipClock(currentTimeEl, hm);
+  const hms = formatTimeForZone(referenceDate, state.current.timezone);
+  updateFlipClock(currentTimeEl, hms);
   if (currentDateEl) {
     currentDateEl.textContent = formatDateForZone(referenceDate, state.current.timezone);
   }
@@ -1489,7 +1489,7 @@ function updateMapConnections(force = false) {
       .addTo(mapConnectionsGroup);
 
     L.polyline([currentCoords, cityCoords], {
-      color: "#ff453a",
+      color: "#778873",
       weight: 2.5,
       opacity: 0.85,
       dashArray: "6, 6"
@@ -1559,10 +1559,10 @@ function upsertCurrentMarker() {
     if (!currentAccuracyCircle) {
       currentAccuracyCircle = L.circle(coords, {
         radius: Math.max(state.current.accuracy, 10),
-        color: "#2563eb",
+        color: "#a1bc98",
         weight: 2,
         opacity: 0.8,
-        fillColor: "#3b82f6",
+        fillColor: "#a1bc98",
         fillOpacity: 0.14
       }).addTo(map);
     } else {

@@ -1,22 +1,35 @@
 :root {
-  --bg-top: #0a0c10;
-  --bg-mid: #06080c;
-  --bg-bottom: #030406;
-  --panel: rgba(22, 26, 36, 0.72);
-  --ink: #f0f4ff;
-  --muted: #8e9cb4;
-  --border: rgba(255, 255, 255, 0.08);
-  --shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
-  --accent: #3b82f6;
-  --accent-glow: rgba(59, 130, 246, 0.3);
+  /* Color Hunt Palette: https://colorhunt.co/palette/f1f3e0d2dcb6a1bc98778873 */
+  --ch-base: #f1f3e0;          /* Soft Cream Sage background */
+  --ch-light-green: #d2dcb6;   /* Light Olive / Warm Green */
+  --ch-medium-green: #a1bc98;  /* Muted Green Accent */
+  --ch-dark-green: #778873;    /* Earthy Muted Forest (Primary Accent) */
+  --ch-terracotta: #b86a5a;    /* Contrast Alert / Highlight */
 
-  /* Apple-style premium dark clock palette */
+  /* Derived layout colors */
+  --bg-top: #f7f9eb;
+  --bg-mid: var(--ch-base);
+  --bg-bottom: #e5e8cc;
+  --panel: rgba(255, 255, 255, 0.85);
+  --ink: #2b3328;              /* Very dark forest text */
+  --muted: #556050;            /* Soft gray-green text */
+  --border: rgba(119, 136, 115, 0.22);
+  --shadow: 0 12px 32px rgba(43, 51, 40, 0.05);
+  --accent: var(--ch-dark-green);
+  --accent-glow: rgba(119, 136, 115, 0.15);
+
+  /* Clock colors (Apple-style premium dark clock palette) */
   --clock-face: #141822;
   --clock-face-soft: #0d1017;
   --clock-border: rgba(255, 255, 255, 0.12);
   --clock-ticks: rgba(255, 255, 255, 0.2);
   --clock-hands: #ffffff;
   --clock-red: #ff453a;
+
+  /* Card styling gradient tones */
+  --card-bg-start: #e4e8cc;
+  --card-bg-mid: var(--ch-base);
+  --card-bg-end: var(--ch-medium-green);
 }
 
 * {
@@ -28,8 +41,8 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: var(--ink);
   background:
-    radial-gradient(900px 560px at 88% -12%, rgba(56, 102, 200, 0.22), transparent 60%),
-    radial-gradient(700px 400px at -6% 104%, rgba(146, 87, 255, 0.08), transparent 62%),
+    radial-gradient(900px 560px at 88% -12%, rgba(161, 188, 152, 0.15), transparent 60%),
+    radial-gradient(700px 400px at -6% 104%, rgba(119, 136, 115, 0.08), transparent 62%),
     linear-gradient(165deg, var(--bg-top) 0%, var(--bg-mid) 52%, var(--bg-bottom) 100%);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
@@ -66,7 +79,7 @@ body {
   margin: 0 0 16px;
   font-size: 1.15rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--ink);
   border-bottom: 1px solid var(--border);
   padding-bottom: 12px;
 }
@@ -85,11 +98,11 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  background: rgba(30, 41, 59, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 10px 12px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
   flex-grow: 1;
 }
 
@@ -111,27 +124,27 @@ body {
 
 .flip-card {
   position: relative;
-  width: 24px;
-  height: 36px;
+  width: 18px;
+  height: 28px;
   display: inline-flex;
   justify-content: center;
   align-items: center;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 1.4rem;
+  font-size: 1.15rem;
   font-weight: 800;
-  color: #ffffff;
-  background: linear-gradient(to bottom, #1b202e 0%, #161a25 49%, #050608 49%, #050608 51%, #10131c 51%, #0a0c12 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--ink);
+  background: linear-gradient(to bottom, var(--card-bg-start) 0%, var(--card-bg-mid) 49%, var(--card-bg-end) 49%, var(--card-bg-end) 51%, var(--card-bg-mid) 51%, var(--card-bg-start) 100%);
+  border: 1px solid var(--border);
   border-radius: 4px;
-  box-shadow: 0 2.5px 5px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2.5px 5px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   backface-visibility: hidden;
   transform-style: preserve-3d;
 }
 
 .flip-colon {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--muted);
   margin: 0 0.5px;
   animation: colonPulse 1s infinite;
 }
@@ -160,11 +173,11 @@ body {
 
 .widget-card {
   width: 100%;
-  background: rgba(30, 41, 59, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -212,7 +225,11 @@ body {
 }
 
 .analog-clock.large-clock .hand.second {
-  display: none;
+  display: block;
+  width: 1.8px;
+  height: 42px;
+  background: var(--clock-red);
+  box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.15);
 }
 
 .analog-clock.large-clock .center {
@@ -225,7 +242,7 @@ body {
 
 .widget-calendar {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: #ffffff;
+  color: var(--ink);
   align-items: stretch;
   justify-content: flex-start;
   min-height: 240px;
@@ -236,7 +253,7 @@ body {
   font-size: 0.78rem;
   font-weight: 800;
   color: #ffffff;
-  background: #ff453a; /* Solid Red Top Header */
+  background: var(--accent); /* Forest Green Header */
   text-transform: uppercase;
   letter-spacing: 0.08em;
   text-align: center;
@@ -254,7 +271,7 @@ body {
   text-align: center;
   font-size: 0.65rem;
   font-weight: 800;
-  color: #ff8f8f; /* Light red/pinkish weekdays */
+  color: var(--ch-medium-green); /* Muted Green weekdays */
   margin-bottom: 8px;
 }
 
@@ -272,7 +289,7 @@ body {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  color: #ffffff; /* White days */
+  color: var(--ink); /* White days */
   border-radius: 999px;
   width: 24px;
   height: 24px;
@@ -284,17 +301,17 @@ body {
 }
 
 .mini-cal-day.today {
-  background: #ff453a; /* Red Today circle */
+  background: var(--ch-terracotta); /* terracotta Today circle */
   color: #ffffff;
   font-weight: 800;
-  box-shadow: 0 2px 6px rgba(255, 69, 58, 0.4);
+  box-shadow: 0 2px 6px rgba(184, 106, 90, 0.4);
 }
 
 .current-row {
   margin: 10px 0 0;
-  color: #cbd5e1;
+  color: var(--muted);
   font-size: 0.84rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 8px;
 }
 
@@ -317,7 +334,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px 12px;
-  background: rgba(10, 12, 18, 0.65);
+  background: rgba(241, 243, 224, 0.7);
   color: var(--ink);
   outline: none;
   font-size: 0.84rem;
@@ -330,10 +347,10 @@ body {
 }
 
 button {
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(119, 136, 115, 0.15);
   color: var(--ink);
   font-weight: 600;
   font-size: 0.84rem;
@@ -345,8 +362,8 @@ button {
 }
 
 button:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(119, 136, 115, 0.3);
+  border-color: rgba(119, 136, 115, 0.5);
   transform: translateY(-1px);
 }
 
@@ -379,7 +396,7 @@ button:active {
 .below-map-tabs {
   display: flex;
   gap: 4px;
-  background: rgba(10, 12, 18, 0.6);
+  background: rgba(210, 220, 182, 0.5);
   padding: 4px;
   border-radius: 12px;
   border: 1px solid var(--border);
@@ -403,7 +420,7 @@ button:active {
 .search-tab:hover,
 .below-map-tab:hover {
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(0, 0, 0, 0.03);
 }
 
 .search-tab.active,
@@ -415,7 +432,7 @@ button:active {
 
 .search-form {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr;
   gap: 8px;
 }
 
@@ -430,12 +447,12 @@ button:active {
   left: 0;
   right: 0;
   z-index: 1000;
-  background: #0f131a;
+  background: var(--ch-base);
   border: 1px solid var(--border);
   border-radius: 10px;
   max-height: 220px;
   overflow-y: auto;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
 .suggestion-item {
@@ -443,7 +460,7 @@ button:active {
   font-size: 0.86rem;
   color: var(--ink);
   cursor: pointer;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--border);
   transition: background-color 0.2s ease;
   display: flex;
   justify-content: space-between;
@@ -461,7 +478,7 @@ button:active {
 
 .suggestion-item:hover,
 .suggestion-item.selected {
-  background: rgba(59, 130, 246, 0.2);
+  background: rgba(161, 188, 152, 0.3);
 }
 
 .suggestion-name {
@@ -498,7 +515,7 @@ button:active {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px 14px;
-  background: rgba(10, 12, 18, 0.55);
+  background: rgba(255, 255, 255, 0.75);
   color: var(--ink);
   outline: none;
   font-size: 0.86rem;
@@ -518,7 +535,7 @@ button:active {
   padding: 14px;
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: rgba(12, 16, 26, 0.75);
+  background: rgba(210, 220, 182, 0.35);
 }
 
 .planner-header {
@@ -613,11 +630,11 @@ button:active {
 }
 
 .planner-add-current-btn {
-  background: rgba(59, 130, 246, 0.1) !important;
-  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  background: rgba(119, 136, 115, 0.1) !important;
+  border: 1px solid rgba(119, 136, 115, 0.3) !important;
   border-radius: 10px !important;
   padding: 8px 12px !important;
-  color: #93c5fd !important;
+  color: var(--accent) !important;
   font-size: 0.72rem !important;
   font-weight: 600 !important;
   cursor: pointer !important;
@@ -631,9 +648,9 @@ button:active {
 }
 
 .planner-add-current-btn:hover {
-  background: rgba(59, 130, 246, 0.2) !important;
+  background: rgba(119, 136, 115, 0.25) !important;
   border-color: var(--accent) !important;
-  color: #ffffff !important;
+  color: var(--ink) !important;
   transform: translateY(-1px) !important;
 }
 
@@ -730,19 +747,19 @@ button:active {
 }
 
 .planner-day:hover:not(.active) {
-  border-color: rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.03);
 }
 
 .planner-day.active {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px var(--accent-glow);
-  background: rgba(59, 130, 246, 0.1);
+  background: var(--accent-glow);
 }
 
 .planner-day-dow {
   font-size: 0.68rem;
-  color: #ffffff;
+  color: var(--ink);
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
@@ -750,7 +767,7 @@ button:active {
 .planner-day-date {
   font-size: 0.82rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--ink);
 }
 
 .planner-grid {
@@ -771,8 +788,8 @@ button:active {
   min-height: 22px;
   border-radius: 6px;
   padding: 4px 6px;
-  background: rgba(10, 12, 18, 0.55);
-  color: #dce6ff;
+  background: rgba(210, 220, 182, 0.55);
+  color: var(--muted);
   font-size: 0.72rem;
   line-height: 1.1;
   display: flex;
@@ -816,7 +833,7 @@ button:active {
 }
 
 .planner-zone-delete-btn:hover {
-  color: #ff453a !important;
+  color: var(--ctp-red) !important;
   background: transparent !important;
   transform: scale(1.15) !important;
 }
@@ -847,7 +864,7 @@ button:active {
   flex: 1;
   height: 4px;
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.1);
   outline: none;
   cursor: pointer;
 }
@@ -884,7 +901,7 @@ button:active {
   font-family: monospace;
   font-size: 0.68rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--ctp-text);
   min-width: 32px;
   text-align: right;
 }
@@ -908,8 +925,8 @@ button:active {
   padding: 3px 5px !important;
   font-size: 0.68rem !important;
   text-align: center;
-  background: rgba(5, 7, 10, 0.8) !important;
-  border-color: rgba(255, 255, 255, 0.06) !important;
+  background: rgba(241, 243, 224, 0.8) !important;
+  border-color: var(--border) !important;
 }
 
 .planner-hour-label {
@@ -918,7 +935,7 @@ button:active {
   display: grid;
   place-items: center;
   color: var(--muted);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(0, 0, 0, 0.03);
   font-size: 0.58rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -930,22 +947,22 @@ button:active {
 }
 
 .planner-hour-label.clickable-hour:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  background: rgba(119, 136, 115, 0.15);
+  color: var(--ink);
 }
 
 .planner-hour-label.active-hour {
-  color: #fff;
+  color: #ffffff;
   background: var(--accent);
   box-shadow: 0 0 8px var(--accent-glow);
   font-weight: 700;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--border);
 }
 
 .planner-cell {
   min-height: 22px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.04);
   transition: all 0.2s ease;
 }
 
@@ -994,7 +1011,7 @@ button:active {
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: rgba(14, 18, 26, 0.7);
+  background: rgba(255, 255, 255, 0.55);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
@@ -1011,16 +1028,16 @@ button:active {
 
 .selected-city-item:hover,
 .fixed-city-item:hover {
-  border-color: rgba(145, 178, 255, 0.4);
-  background: rgba(22, 28, 40, 0.75);
+  border-color: rgba(119, 136, 115, 0.4);
+  background: rgba(255, 255, 255, 0.95);
   transform: translateY(-1.5px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
 }
 
 .selected-city-text,
 .fixed-city-name {
   font-size: 0.88rem;
-  color: #dce6ff;
+  color: var(--muted);
   font-weight: 700;
   grid-column: 1 / 2;
   grid-row: 1;
@@ -1033,7 +1050,7 @@ button:active {
 .fixed-city-datetime {
   font-size: 0.95rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--ink);
   font-variant-numeric: tabular-nums;
   grid-column: 1 / 2;
   grid-row: 2;
@@ -1063,7 +1080,7 @@ button:active {
 .inline-time-input {
   border: 1px solid var(--accent) !important;
   border-radius: 8px;
-  background: rgba(10, 12, 18, 0.95) !important;
+  background: rgba(241, 243, 224, 0.9) !important;
   color: var(--ink);
   padding: 4px 6px;
   font-size: 0.84rem;
@@ -1087,9 +1104,9 @@ button:active {
 }
 
 .edit-city-time {
-  border-color: rgba(59, 130, 246, 0.4);
-  background: rgba(59, 130, 246, 0.15);
-  color: #93c5fd;
+  border-color: rgba(161, 188, 152, 0.4);
+  background: rgba(161, 188, 152, 0.15);
+  color: var(--ch-medium-green);
 }
 
 .selected-city-item .edit-city-time {
@@ -1103,21 +1120,21 @@ button:active {
 }
 
 .edit-city-time:hover {
-  background: rgba(59, 130, 246, 0.3);
-  border-color: rgba(59, 130, 246, 0.6);
+  background: rgba(161, 188, 152, 0.3);
+  border-color: rgba(161, 188, 152, 0.6);
 }
 
 .delete-city {
   grid-column: 4 / 5;
   grid-row: 1 / 4;
-  border-color: rgba(239, 68, 68, 0.4);
-  background: rgba(239, 68, 68, 0.15);
-  color: #fca5a5;
+  border-color: rgba(184, 106, 90, 0.4);
+  background: rgba(184, 106, 90, 0.15);
+  color: var(--ch-terracotta);
 }
 
 .delete-city:hover {
-  background: rgba(239, 68, 68, 0.3);
-  border-color: rgba(239, 68, 68, 0.6);
+  background: rgba(184, 106, 90, 0.3);
+  border-color: rgba(184, 106, 90, 0.6);
 }
 
 .map-shell {
@@ -1134,15 +1151,15 @@ button:active {
 }
 
 .leaflet-container {
-  background: #090b10;
+  background: var(--bg-bottom);
 }
 
 .leaflet-control-layers,
 .leaflet-control-scale-line {
   border: 0;
   border-radius: 8px;
-  color: #111827;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+  color: var(--ink);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.05);
 }
 
 .leaflet-control-layers {
@@ -1154,13 +1171,13 @@ button:active {
 }
 
 .leaflet-popup-content-wrapper {
-  background: #0f131a;
+  background: var(--ch-base);
   border: 1px solid var(--border);
   color: var(--ink);
 }
 
 .leaflet-popup-tip {
-  background: #0f131a;
+  background: var(--ch-base);
 }
 
 .leaflet-popup-content a {
@@ -1187,14 +1204,14 @@ button:active {
 }
 
 .ghost-btn {
-  background: rgba(100, 110, 130, 0.15);
-  border-color: rgba(180, 190, 220, 0.3);
+  background: rgba(119, 136, 115, 0.15);
+  border-color: var(--border);
 }
 
 .edit-error {
   margin: 0;
   min-height: 1.2em;
-  color: #fca5a5;
+  color: var(--ch-terracotta);
   font-size: 0.8rem;
 }
 
