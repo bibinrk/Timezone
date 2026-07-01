@@ -1510,7 +1510,7 @@ function updateMapConnections(force = false) {
       .addTo(mapConnectionsGroup);
 
     L.polyline([currentCoords, cityCoords], {
-      color: "#778873",
+      color: "#3f72af",
       weight: 2.5,
       opacity: 0.85,
       dashArray: "6, 6"
@@ -1580,10 +1580,10 @@ function upsertCurrentMarker() {
     if (!currentAccuracyCircle) {
       currentAccuracyCircle = L.circle(coords, {
         radius: Math.max(state.current.accuracy, 10),
-        color: "#a1bc98",
+        color: "#3f72af",
         weight: 2,
         opacity: 0.8,
-        fillColor: "#a1bc98",
+        fillColor: "#3f72af",
         fillOpacity: 0.14
       }).addTo(map);
     } else {

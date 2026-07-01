@@ -1,35 +1,35 @@
 :root {
-  /* Color Hunt Palette: https://colorhunt.co/palette/f1f3e0d2dcb6a1bc98778873 */
-  --ch-base: #f1f3e0;          /* Soft Cream Sage background */
-  --ch-light-green: #d2dcb6;   /* Light Olive / Warm Green */
-  --ch-medium-green: #a1bc98;  /* Muted Green Accent */
-  --ch-dark-green: #778873;    /* Earthy Muted Forest (Primary Accent) */
-  --ch-terracotta: #b86a5a;    /* Contrast Alert / Highlight */
+  /* Color Hunt Palette: https://colorhunt.co/palette/f9f7f7dbe2ef3f72af112d4e */
+  --ch-base: #f9f7f7;          /* Soft light gray/white */
+  --ch-light-blue: #dbe2ef;    /* Soft blue-gray */
+  --ch-medium-blue: #3f72af;   /* Vibrant medium blue */
+  --ch-dark-blue: #112d4e;     /* Deep navy blue */
+  --ch-terracotta: #e05252;    /* Beautiful contrast alert coral */
 
   /* Derived layout colors */
-  --bg-top: #f7f9eb;
+  --bg-top: #f0f4f8;
   --bg-mid: var(--ch-base);
-  --bg-bottom: #e5e8cc;
+  --bg-bottom: #e8eef6;
   --panel: rgba(255, 255, 255, 0.85);
-  --ink: #2b3328;              /* Very dark forest text */
-  --muted: #556050;            /* Soft gray-green text */
-  --border: rgba(119, 136, 115, 0.22);
-  --shadow: 0 12px 32px rgba(43, 51, 40, 0.05);
-  --accent: var(--ch-dark-green);
-  --accent-glow: rgba(119, 136, 115, 0.15);
+  --ink: var(--ch-dark-blue);  /* Deep navy text */
+  --muted: #485f7a;            /* Soft gray-blue text */
+  --border: rgba(63, 114, 175, 0.18);
+  --shadow: 0 12px 32px rgba(17, 45, 78, 0.05);
+  --accent: var(--ch-medium-blue);
+  --accent-glow: rgba(63, 114, 175, 0.15);
 
   /* Clock colors (Apple-style premium dark clock palette) */
-  --clock-face: #141822;
-  --clock-face-soft: #0d1017;
+  --clock-face: #112d4e;       /* Deep navy clock face matching our palette */
+  --clock-face-soft: #0b1e36;
   --clock-border: rgba(255, 255, 255, 0.12);
   --clock-ticks: rgba(255, 255, 255, 0.2);
   --clock-hands: #ffffff;
   --clock-red: #ff453a;
 
   /* Card styling gradient tones */
-  --card-bg-start: #e4e8cc;
+  --card-bg-start: #ffffff;
   --card-bg-mid: var(--ch-base);
-  --card-bg-end: var(--ch-medium-green);
+  --card-bg-end: var(--ch-light-blue);
 }
 
 * {
@@ -44,8 +44,8 @@ body {
   margin: 0;
   color: var(--ink);
   background:
-    radial-gradient(900px 560px at 88% -12%, rgba(161, 188, 152, 0.15), transparent 60%),
-    radial-gradient(700px 400px at -6% 104%, rgba(119, 136, 115, 0.08), transparent 62%),
+    radial-gradient(900px 560px at 88% -12%, rgba(63, 114, 175, 0.15), transparent 60%),
+    radial-gradient(700px 400px at -6% 104%, rgba(17, 45, 78, 0.08), transparent 62%),
     linear-gradient(165deg, var(--bg-top) 0%, var(--bg-mid) 52%, var(--bg-bottom) 100%);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
@@ -274,7 +274,7 @@ body {
   text-align: center;
   font-size: 0.65rem;
   font-weight: 800;
-  color: var(--ch-medium-green); /* Muted Green weekdays */
+  color: var(--ch-medium-blue); /* Muted blue weekdays */
   margin-bottom: 8px;
 }
 
@@ -307,7 +307,7 @@ body {
   background: var(--ch-terracotta); /* terracotta Today circle */
   color: #ffffff;
   font-weight: 800;
-  box-shadow: 0 2px 6px rgba(184, 106, 90, 0.4);
+  box-shadow: 0 2px 6px rgba(224, 82, 82, 0.4);
 }
 
 .current-row {
@@ -337,7 +337,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px 12px;
-  background: rgba(241, 243, 224, 0.7);
+  background: rgba(249, 247, 247, 0.7);
   color: var(--ink);
   outline: none;
   font-size: 0.84rem;
@@ -353,7 +353,7 @@ button {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px 16px;
-  background: rgba(119, 136, 115, 0.15);
+  background: rgba(63, 114, 175, 0.15);
   color: var(--ink);
   font-weight: 600;
   font-size: 0.84rem;
@@ -365,8 +365,8 @@ button {
 }
 
 button:hover {
-  background: rgba(119, 136, 115, 0.3);
-  border-color: rgba(119, 136, 115, 0.5);
+  background: rgba(63, 114, 175, 0.3);
+  border-color: rgba(63, 114, 175, 0.5);
   transform: translateY(-1px);
 }
 
@@ -399,7 +399,7 @@ button:active {
 .below-map-tabs {
   display: flex;
   gap: 4px;
-  background: rgba(210, 220, 182, 0.5);
+  background: rgba(219, 226, 239, 0.5);
   padding: 4px;
   border-radius: 12px;
   border: 1px solid var(--border);
@@ -481,7 +481,7 @@ button:active {
 
 .suggestion-item:hover,
 .suggestion-item.selected {
-  background: rgba(161, 188, 152, 0.3);
+  background: rgba(63, 114, 175, 0.25);
 }
 
 .suggestion-name {
@@ -544,7 +544,7 @@ button:active {
   padding: 14px;
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: rgba(210, 220, 182, 0.35);
+  background: rgba(219, 226, 239, 0.35);
 }
 
 .planner-header {
@@ -641,8 +641,8 @@ button:active {
 }
 
 .planner-add-current-btn {
-  background: rgba(119, 136, 115, 0.1) !important;
-  border: 1px solid rgba(119, 136, 115, 0.3) !important;
+  background: rgba(63, 114, 175, 0.1) !important;
+  border: 1px solid rgba(63, 114, 175, 0.3) !important;
   border-radius: 10px !important;
   padding: 8px 12px !important;
   color: var(--accent) !important;
@@ -659,7 +659,7 @@ button:active {
 }
 
 .planner-add-current-btn:hover {
-  background: rgba(119, 136, 115, 0.25) !important;
+  background: rgba(63, 114, 175, 0.25) !important;
   border-color: var(--accent) !important;
   color: var(--ink) !important;
   transform: translateY(-1px) !important;
@@ -861,7 +861,7 @@ button:active {
   min-height: 28px;
   border-radius: 6px;
   padding: 6px 8px;
-  background: rgba(210, 220, 182, 0.55);
+  background: rgba(219, 226, 239, 0.55);
   color: var(--muted);
   font-size: 0.88rem;
   line-height: 1.15;
@@ -997,7 +997,7 @@ button:active {
   padding: 3px 5px !important;
   font-size: 0.8rem !important;
   text-align: center;
-  background: rgba(241, 243, 224, 0.8) !important;
+  background: rgba(249, 247, 247, 0.8) !important;
   border-color: var(--border) !important;
 }
 
@@ -1019,7 +1019,7 @@ button:active {
 }
 
 .planner-hour-label.clickable-hour:hover {
-  background: rgba(119, 136, 115, 0.15);
+  background: rgba(63, 114, 175, 0.15);
   color: var(--ink);
 }
 
@@ -1101,7 +1101,7 @@ button:active {
 
 .selected-city-item:hover,
 .fixed-city-item:hover {
-  border-color: rgba(119, 136, 115, 0.4);
+  border-color: rgba(63, 114, 175, 0.4);
   background: rgba(255, 255, 255, 0.95);
   transform: translateY(-1.5px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
@@ -1153,7 +1153,7 @@ button:active {
 .inline-time-input {
   border: 1px solid var(--accent) !important;
   border-radius: 8px;
-  background: rgba(241, 243, 224, 0.9) !important;
+  background: rgba(249, 247, 247, 0.9) !important;
   color: var(--ink);
   padding: 4px 6px;
   font-size: 0.84rem;
@@ -1177,9 +1177,9 @@ button:active {
 }
 
 .edit-city-time {
-  border-color: rgba(161, 188, 152, 0.4);
-  background: rgba(161, 188, 152, 0.15);
-  color: var(--ch-medium-green);
+  border-color: rgba(63, 114, 175, 0.4);
+  background: rgba(63, 114, 175, 0.15);
+  color: var(--ch-medium-blue);
 }
 
 .selected-city-item .edit-city-time {
@@ -1193,21 +1193,21 @@ button:active {
 }
 
 .edit-city-time:hover {
-  background: rgba(161, 188, 152, 0.3);
-  border-color: rgba(161, 188, 152, 0.6);
+  background: rgba(63, 114, 175, 0.3);
+  border-color: rgba(63, 114, 175, 0.6);
 }
 
 .delete-city {
   grid-column: 4 / 5;
   grid-row: 1 / 4;
-  border-color: rgba(184, 106, 90, 0.4);
-  background: rgba(184, 106, 90, 0.15);
+  border-color: rgba(224, 82, 82, 0.4);
+  background: rgba(224, 82, 82, 0.15);
   color: var(--ch-terracotta);
 }
 
 .delete-city:hover {
-  background: rgba(184, 106, 90, 0.3);
-  border-color: rgba(184, 106, 90, 0.6);
+  background: rgba(224, 82, 82, 0.3);
+  border-color: rgba(224, 82, 82, 0.6);
 }
 
 .map-shell {
@@ -1277,7 +1277,7 @@ button:active {
 }
 
 .ghost-btn {
-  background: rgba(119, 136, 115, 0.15);
+  background: rgba(63, 114, 175, 0.15);
   border-color: var(--border);
 }
 
