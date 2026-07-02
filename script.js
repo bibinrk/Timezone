@@ -1199,6 +1199,7 @@ function refreshTimezoneDisplay() {
   renderSelectedCities(referenceDate);
   renderMeetingPlanner(referenceDate);
   upsertCurrentMarker();
+  updateMapConnectionsPopupTimes();
 
   if (!editFormEl.classList.contains("hidden")) {
     renderEditTargetLabel(referenceDate);
@@ -1227,6 +1228,11 @@ function renderSelectedCities(referenceDate) {
       const isEditing = state.inlineEdit
         && state.inlineEdit.type === "selected"
         && state.inlineEdit.id === city.id;
+
+      const textSpan = item.querySelector(".selected-city-text");
+      if (textSpan) {
+        textSpan.textContent = `${city.name} | ${formatTimezone(referenceDate, city.timezone)}`;
+      }
 
       if (!isEditing) {
         const timeSpan = item.querySelector(".selected-city-time");
@@ -1335,6 +1341,11 @@ function renderFixedCities(referenceDate) {
       const isEditing = state.inlineEdit
         && state.inlineEdit.type === "fixed"
         && state.inlineEdit.name === city.name;
+
+      const nameDiv = item.querySelector(".fixed-city-name");
+      if (nameDiv) {
+        nameDiv.textContent = `${city.name} (${formatTimezone(referenceDate, city.timezone)})`;
+      }
 
       if (!isEditing) {
         const datetimeEl = item.querySelector(".fixed-city-datetime:not(input)");
@@ -1510,7 +1521,7 @@ function updateMapConnections(force = false) {
       .addTo(mapConnectionsGroup);
 
     L.polyline([currentCoords, cityCoords], {
-      color: "#3f72af",
+      color: "#778873",
       weight: 2.5,
       opacity: 0.85,
       dashArray: "6, 6"
@@ -1580,10 +1591,10 @@ function upsertCurrentMarker() {
     if (!currentAccuracyCircle) {
       currentAccuracyCircle = L.circle(coords, {
         radius: Math.max(state.current.accuracy, 10),
-        color: "#3f72af",
+        color: "#a1bc98",
         weight: 2,
         opacity: 0.8,
-        fillColor: "#3f72af",
+        fillColor: "#a1bc98",
         fillOpacity: 0.14
       }).addTo(map);
     } else {
